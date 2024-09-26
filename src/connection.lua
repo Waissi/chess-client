@@ -11,14 +11,14 @@ return {
         print(ip)
         if role == "host" then
             testRole = role
-            --host = enet.host_create(ip .. ":6789")
-            host = enet.host_create("*:6789")
+            host = enet.host_create(ip .. ":6789")
+            --host = enet.host_create("localhost:6789")
             print(host:get_socket_address())
             return
         end
         host = enet.host_create()
-        --local server = host:connect(ip .. ":6789")
-        local server = host:connect("*:6789")
+        local server = host:connect(ip .. ":6789")
+        --local server = host:connect("*:6789")
         print(server)
     end,
 
