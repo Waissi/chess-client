@@ -19,10 +19,9 @@ end
 
 function love.keypressed(key)
     if key == "p" then
-        M.connection.test()
-    elseif key == "return" then
-        return M.hud.on_key_pressed(key)
+        M.connection.send_game_data({})
     end
+    return M.hud.on_key_pressed(key)
 end
 
 function love.textinput(char)

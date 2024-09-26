@@ -35,6 +35,10 @@ return setmetatable({
         on_key_pressed = function(inputBox, key)
             if key == "return" then
                 inputBox.callback(table.concat(inputBox.text))
+                return true
+            elseif key == "backspace" then
+                inputBox.text[#inputBox.text] = nil
+                return true
             end
         end,
 

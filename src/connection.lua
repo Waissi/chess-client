@@ -4,14 +4,13 @@ local testRole, host, peer
 return {
     init_host = function()
         local socket = require("socket")
-        assert(socket.bind("*", 0))
+        assert(socket.bind("*", 6789))
         local ip = socket.dns.toip(socket.dns.gethostname())
         local encoded = love.data.encode("string", "base64", ip)
         ---@cast encoded string
         love.window.showMessageBox(encoded, "Share this key with your game partner", "info", true)
         testRole = "host"
         host = enet.host_create(ip .. ":6789")
-        --host = enet.host_create("localhost:6789")
     end,
 
     init_client = function(key)
@@ -22,7 +21,8 @@ return {
         return true
     end,
 
-    test = function()
+    ---@param data table
+    send_game_data = function(data)
         if testRole == "host" then
             if peer then
                 peer:send("test")
@@ -39,10 +39,11 @@ return {
                 print "peer connected"
             elseif event.type == "disconnect" then
                 host:destroy()
-                print "peer disconnected"
                 love.event.quit()
+                return
             elseif event.type == "receive" then
                 print(event.data)
+                event.peer:send("received data")
             end
         end
         event = host:service()
@@ -51,6 +52,5 @@ return {
     disconnect = function()
         if not host then return end
         host:destroy()
-        print "host disconnect"
     end
 }
