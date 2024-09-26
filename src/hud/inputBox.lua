@@ -39,6 +39,11 @@ return setmetatable({
             elseif key == "backspace" then
                 inputBox.text[#inputBox.text] = nil
                 return true
+            elseif key == "v" and love.keyboard.isScancodeDown("lgui") then
+                local clipboardText = love.system.getClipboardText()
+                if clipboardText then
+                    inputBox.text = { clipboardText }
+                end
             end
         end,
 

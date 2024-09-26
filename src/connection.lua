@@ -10,6 +10,7 @@ return {
         ---@cast encoded string
         love.window.showMessageBox(encoded, "Share this key with your game partner", "info", true)
         testRole = "host"
+        print(ip)
         host = enet.host_create(ip .. ":6789")
     end,
 
@@ -17,7 +18,7 @@ return {
         local ip = love.data.decode("string", "base64", key)
         host = enet.host_create()
         local server = host:connect(ip .. ":6789")
-        --local server = host:connect("localhost:6789")
+        print(ip)
         return true
     end,
 
