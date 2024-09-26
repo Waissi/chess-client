@@ -4,15 +4,13 @@ import "table"
 
 ---@type Modules
 local M = import "modules"
-
----@type Hud
-local hud
+local beige = { .75, .7, .6 }
 
 local arrow = love.mouse.getSystemCursor("arrow")
 local hand = love.mouse.getSystemCursor("hand")
 
 function love.load()
-    hud = M.hud.init()
+    M.hud.init()
 end
 
 function love.update()
@@ -22,23 +20,30 @@ end
 function love.keypressed(key)
     if key == "p" then
         M.connection.test()
+    elseif key == "return" then
+        return M.hud.on_key_pressed(key)
     end
 end
 
+function love.textinput(char)
+    M.hud.on_text_input(char)
+end
+
 function love.mousepressed(x, y, button)
-    if M.hud.on_mouse_pressed(hud, button) then return end
+    if M.hud.on_mouse_pressed(button) then return end
     M.game.on_mouse_pressed(x, y, button)
 end
 
 function love.mousemoved(x, y)
     local hover = false
-    if M.hud.on_mouse_moved(hud, x, y) or M.game.on_mouse_moved(x, y) then hover = true end
+    if M.hud.on_mouse_moved(x, y) or M.game.on_mouse_moved(x, y) then hover = true end
     love.mouse.setCursor(hover and hand or arrow)
 end
 
 function love.draw()
+    love.graphics.clear(beige)
     M.game.draw()
-    M.hud.draw(hud)
+    M.hud.draw()
 end
 
 function love.quit()

@@ -3,6 +3,8 @@
 ---@field hud HudModule
 ---@field menu MenuModule
 ---@field button ButtonModule
+---@field label LabelModule
+---@field inputBox InputBoxModule
 ---@field players PlayerModule
 ---@field movement MovementModule
 ---@field coordinates CoordinatesModule

@@ -38,7 +38,6 @@ return {
 
     ---@param board Square[][]
     draw = function(board)
-        love.graphics.clear(beige)
         for j = 1, 8 do
             for i = 1, 8 do
                 M.square.draw(board[j][i])

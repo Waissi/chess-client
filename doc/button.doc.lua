@@ -1,10 +1,7 @@
 ---@class ButtonModule
----@field new fun(x: number, y: number, w: number, h: number, text: string, callback: function): Button
----@field on_mouse_moved fun(button: Button, x: number, y: number): boolean
----@field on_mouse_pressed fun(button: Button): boolean
----@field draw fun(button: Button)
+---@field new fun(self: ButtonModule, x: number, y: number, w: number, h: number, text: string, callback: function): Button
 
----@class Button
+---@class Button: Widget
 ---@field x number
 ---@field y number
 ---@field w number

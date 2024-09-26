@@ -1,4 +1,5 @@
 ---@class ConnectionModule
----@field init fun(role: string)
+---@field init_host fun()
+---@field init_client fun(ipAdress: string): boolean
 ---@field update fun()
 ---@field disconnect fun()

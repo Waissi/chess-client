@@ -2,24 +2,24 @@ local enet = require "enet"
 local testRole, host, peer
 
 return {
-    init = function(role)
+    init_host = function()
         local socket = require("socket")
-        -- create a TCP socket and bind it to the local host, at any port
-        local _server = assert(socket.bind("*", 0))
-        -- find out which port the OS chose for us
+        assert(socket.bind("*", 0))
         local ip = socket.dns.toip(socket.dns.gethostname())
-        print(ip)
-        if role == "host" then
-            testRole = role
-            --host = enet.host_create(ip .. ":6789")
-            host = enet.host_create("localhost:6789")
-            print(host:get_socket_address())
-            return
-        end
+        local encoded = love.data.encode("string", "base64", ip)
+        ---@cast encoded string
+        love.window.showMessageBox(encoded, "Share this key with your game partner", "info", true)
+        testRole = "host"
+        host = enet.host_create(ip .. ":6789")
+        --host = enet.host_create("localhost:6789")
+    end,
+
+    init_client = function(key)
+        local ip = love.data.decode("string", "base64", key)
         host = enet.host_create()
-        --local server = host:connect(ip .. ":6789")
-        local server = host:connect("localhost:6789")
-        print(server)
+        local server = host:connect(ip .. ":6789")
+        --local server = host:connect("localhost:6789")
+        return true
     end,
 
     test = function()
