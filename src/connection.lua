@@ -43,7 +43,6 @@ return {
                 return
             elseif event.type == "receive" then
                 print(event.data)
-                event.peer:send("received data")
             end
         end
         event = host:service()
