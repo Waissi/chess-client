@@ -1,0 +1,12 @@
+---@class Modules
+---@field game GameModule
+---@field hud HudModule
+---@field menu MenuModule
+---@field button ButtonModule
+---@field players PlayerModule
+---@field movement MovementModule
+---@field coordinates CoordinatesModule
+---@field board BoardModule
+---@field square SquareModule
+---@field interface PieceModule
+---@field connection ConnectionModule

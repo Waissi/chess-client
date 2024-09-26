@@ -1,0 +1,15 @@
+---@class ButtonModule
+---@field new fun(x: number, y: number, w: number, h: number, text: string, callback: function): Button
+---@field on_mouse_moved fun(button: Button, x: number, y: number): boolean
+---@field on_mouse_pressed fun(button: Button): boolean
+---@field draw fun(button: Button)
+
+---@class Button
+---@field x number
+---@field y number
+---@field w number
+---@field h number
+---@field text string
+---@field callback function
+---@field state string
+---@field color table

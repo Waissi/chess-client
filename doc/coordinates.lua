@@ -1,0 +1,5 @@
+---@class CoordinatesModule
+---@field init fun(color: string)
+---@field get_letter fun(index: number): string
+---@field get_index fun(letter: string): number
+---@field draw fun(screenW: number, screenH: number, squareW: number, squareH: number, columnW: number)

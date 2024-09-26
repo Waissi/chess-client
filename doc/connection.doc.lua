@@ -1,0 +1,4 @@
+---@class ConnectionModule
+---@field init fun(role: string)
+---@field update fun()
+---@field disconnect fun()
