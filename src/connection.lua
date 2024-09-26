@@ -38,8 +38,10 @@ return {
         if event then
             if event.type == "connect" then
                 peer = event.peer
+                print "connect"
             elseif event.type == "disconnect" then
                 host:destroy()
+                print "peer disconnected"
                 love.event.quit()
             elseif event.type == "receive" then
                 print(event.data)
@@ -50,6 +52,6 @@ return {
 
     disconnect = function()
         host:destroy()
-        print "disconnect"
+        print "host disconnect"
     end
 }
