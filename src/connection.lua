@@ -1,17 +1,5 @@
 local enet = require "enet"
 local testRole, host, peer
---[[
-    local socket = require("socket")
-    -- create a TCP socket and bind it to the local host, at any port
-    local server = assert(socket.bind("*", 0))
-    -- find out which port the OS chose for us
-    local ip = socket.dns.toip(socket.dns.gethostname())
-    print(ip)
-
-    local enet = require "enet"
-    local host = enet.host_create(ip..":100")
-    print(host:get_socket_address())
-    ]]
 
 return {
     init = function(role)
@@ -23,12 +11,14 @@ return {
         print(ip)
         if role == "host" then
             testRole = role
-            host = enet.host_create(ip .. ":6789")
+            --host = enet.host_create(ip .. ":6789")
+            host = enet.host_create("*:6789")
             print(host:get_socket_address())
             return
         end
         host = enet.host_create()
-        local server = host:connect(ip .. ":6789")
+        --local server = host:connect(ip .. ":6789")
+        local server = host:connect("*:6789")
         print(server)
     end,
 
