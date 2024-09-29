@@ -1,12 +1,13 @@
 ---@class ButtonModule
----@field new fun(self: ButtonModule, x: number, y: number, w: number, h: number, text: string, callback: function): Button
+---@field new fun(self: ButtonModule, x: number, y: number, w: number, h: number, text: string, fontSize: number, callback: function): Button
 
 ---@class Button: Widget
 ---@field x number
 ---@field y number
 ---@field w number
 ---@field h number
----@field text string
+---@field label Label
 ---@field callback function
 ---@field state string
 ---@field color table
+---@field labelColor table

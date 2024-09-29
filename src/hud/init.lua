@@ -1,18 +1,25 @@
 ---@type Modules
 local M = import "modules"
 
-local currentMenu = "connection"
+---@type string
+local currentMenu
 
 ---@type Menu[]
 local menus
 return {
     init = function()
+        local width, height = M.window.get_dimensions()
         menus = {
-            start = M.menu.init("start"),
-            connection = M.menu.init("connection"),
-            game = M.menu.init("game"),
-            client = M.menu.init("client")
+            start = M.menu.init("start", width, height),
+            connection = M.menu.init("connection", width, height),
+            game = M.menu.init("game", width, height),
+            client = M.menu.init("client", width, height),
+            userName = M.menu.init("userName", width, height),
+            threefold = M.menu.init("threefold", width, height),
+            fivefold = M.menu.init("fivefold", width, height)
         }
+        local userName = M.readwrite.get_user_name()
+        currentMenu = userName and "connection" or "userName"
     end,
 
     ---@param name string
@@ -31,10 +38,12 @@ return {
         M.menu.on_text_input(menus[currentMenu], char)
     end,
 
+    ---@param x number
+    ---@param y number
     ---@param button number
-    on_mouse_pressed = function(button)
+    on_mouse_pressed = function(x, y, button)
         if not (button == 1) then return end
-        return M.menu.on_mouse_pressed(menus[currentMenu])
+        return M.menu.on_mouse_pressed(menus[currentMenu], x, y)
     end,
 
     ---@param key string

@@ -14,24 +14,46 @@ local pieces = {
 ---@type Piece?
 local selectedPiece
 
+---@type string
+local playerColor = ""
+
 ---@type Player
 local currentPlayer
 
-local startPos = import "positions"
-
----@type Game
+---@type Game?
 local game
-local validate_turn = function()
+local is_valid_move = function()
+    if not game then return end
     local king = M.players.get_current_player_king(currentPlayer, game.pieces)
     M.players.inspect_check(king, game.pieces, game.board)
     return not currentPlayer.check
 end
 
+---@param currentPiece Piece
+---@param previousPos Position
+---@param deadPawn Piece?
+---@param promotion string?
+local next_turn = function(currentPiece, previousPos, deadPawn, promotion)
+    currentPiece:unselect()
+    selectedPiece = nil
+    currentPlayer = M.players.next(currentPlayer)
+    M.connection.send_game_data({
+        movedPiece = {
+            newPos = { x = currentPiece.x, y = currentPiece.y },
+            previousPos = { x = previousPos.x, y = previousPos.y }
+        },
+        deadPawn = deadPawn and { x = deadPawn.x, y = deadPawn.y },
+        promotion = promotion
+    })
+end
+
 return {
+    ---@param color string
     init = function(color)
-        currentPlayer = M.players.init(color)
-        M.movement.init(currentPlayer.color)
-        M.coordinates.init(currentPlayer.color)
+        playerColor = color
+        currentPlayer = M.players.get_player("white")
+        M.movement.init(playerColor)
+        M.coordinates.init(playerColor)
         game = {
             board = M.board.new(),
             pieces = {
@@ -39,7 +61,8 @@ return {
                 black = {}
             }
         }
-        for number, list in pairs(startPos[currentPlayer.color]) do
+        local startPos = M.position.init_start_positions(playerColor)
+        for number, list in pairs(startPos) do
             for letter, piece in pairs(list) do
                 local x = M.coordinates.get_index(letter)
                 local y = number
@@ -53,16 +76,25 @@ return {
                 M.square.occupy(square, piece)
             end
         end
+        M.position.get_repetition(game.pieces)
         M.hud.push_menu("game")
+        M.connection.start_game(color == "white" and "black" or "white")
         return game
+    end,
+
+    release = function()
+        game = nil
+        playerColor = ""
+        M.hud.push_menu("connection")
     end,
 
     ---@param x number
     ---@param y number
     on_mouse_moved = function(x, y)
-        if not currentPlayer then return end
+        if not game then return end
+        if not (currentPlayer.color == playerColor) then return end
         local hover = false
-        for _, piece in ipairs(game.pieces[currentPlayer.color]) do
+        for _, piece in ipairs(game.pieces[playerColor]) do
             local square = game.board[piece.y][piece.x]
             local isHovered = M.square.is_hovered(square, x, y)
             hover = isHovered and true or hover
@@ -75,7 +107,8 @@ return {
     ---@param y number
     ---@param button number
     on_mouse_pressed = function(x, y, button)
-        if not currentPlayer then return end
+        if not game then return end
+        if not (currentPlayer.color == playerColor) then return end
         if button == 2 then
             if not selectedPiece then return end
             selectedPiece:unselect()
@@ -100,10 +133,8 @@ return {
                         end
                         M.square.free(currentSquare)
                         M.square.occupy(square, newQueen)
-                        if validate_turn(game) then
-                            selectedPiece = nil
-                            currentPlayer = M.players.next(currentPlayer)
-                            M.players.set_last_piece(newQueen)
+                        if is_valid_move(game) then
+                            next_turn(newQueen, currentSquare.gridPos, nil, "queen")
                             return
                         end
                         M.square.occupy(currentSquare, selectedPiece)
@@ -125,10 +156,8 @@ return {
                             M.square.free(deadPawnSquare)
                             M.square.occupy(square, selectedPiece)
                             selectedPiece:move(square)
-                            if validate_turn(game) then
-                                selectedPiece:unselect()
-                                selectedPiece = nil
-                                currentPlayer = M.players.next(currentPlayer)
+                            if is_valid_move(game) then
+                                next_turn(selectedPiece, currentSquare.gridPos, deadPawn)
                                 return
                             end
                             selectedPiece:move(currentSquare)
@@ -161,10 +190,8 @@ return {
                     M.square.free(castlingMovement.lastPos)
                     selectedPiece:move(square)
                     castlingMovement.tower:move(castlingMovement.newPos)
-                    if validate_turn(game) then
-                        selectedPiece:unselect()
-                        selectedPiece = nil
-                        currentPlayer = M.players.next(currentPlayer)
+                    if is_valid_move(game) then
+                        next_turn(selectedPiece, currentSquare.gridPos)
                         return
                     end
                     selectedPiece.hasMoved = false
@@ -185,10 +212,8 @@ return {
                     M.square.free(currentSquare)
                     M.square.occupy(square, selectedPiece)
                     selectedPiece:move(square)
-                    if validate_turn(game) then
-                        selectedPiece:unselect()
-                        selectedPiece = nil
-                        currentPlayer = M.players.next(currentPlayer)
+                    if is_valid_move(game) then
+                        next_turn(selectedPiece, currentSquare.gridPos)
                         return
                     end
                     selectedPiece:move(currentSquare)
@@ -202,7 +227,7 @@ return {
                 end
             end
         end
-        for _, piece in ipairs(game.pieces[currentPlayer.color]) do
+        for _, piece in ipairs(game.pieces[playerColor]) do
             if piece:on_mouse_pressed() then
                 if selectedPiece then
                     selectedPiece:unselect()
@@ -213,8 +238,59 @@ return {
         end
     end,
 
+    ---@param gameData table
+    receive_game_data = function(gameData)
+        if not game then return end
+        local newX, newY = M.coordinates.translate(gameData.movedPiece.newPos)
+        local newSquare = game.board[newY][newX]
+        if newSquare.piece then
+            table.delete(game.pieces[playerColor], newSquare.piece)
+            M.square.free(newSquare)
+        end
+        local pieceX, pieceY = M.coordinates.translate(gameData.movedPiece.previousPos)
+        local pieceSquare = game.board[pieceY][pieceX]
+        local piece = pieceSquare.piece
+        if not piece then
+            error("something went wrong")
+        end
+        piece:move(newSquare)
+        M.square.free(pieceSquare)
+        M.square.occupy(newSquare, piece)
+        if gameData.promotion then
+            local newPiece = pieces[gameData.promotion]:new(0, 0, piece.color)
+            table.insert(game.pieces[piece.color], newPiece)
+            table.delete(game.pieces[piece.color], piece)
+            M.square.free(newSquare)
+            newPiece:move(newSquare)
+            M.square.occupy(newSquare, newPiece)
+        end
+        if gameData.deadPawn then
+            local pawnX, pawnY = M.coordinates.translate(gameData.deadPawn)
+            local pawnSquare = game.board[pawnY][pawnX]
+            local pawn = pawnSquare.piece
+            if not pawn then
+                error("something went wrong")
+            end
+            table.delete(game.pieces[pawn.color], pawn)
+            M.square.free(pawnSquare)
+        end
+        local repetition = M.position.get_repetition(game.pieces)
+        if repetition == 3 then
+            M.hud.push_menu("threefold")
+            return
+        elseif repetition == 5 then
+            M.hud.push_menu("fivefold")
+            return
+        end
+        currentPlayer = M.players.get_player(playerColor)
+    end,
+
+    continue_playing = function()
+        currentPlayer = M.players.get_player(playerColor)
+    end,
+
     draw = function()
-        if not currentPlayer then return end
+        if not game then return end
         M.board.draw(game.board)
         love.graphics.setColor(1, 1, 1, 1)
         for _, colorPieces in pairs(game.pieces) do

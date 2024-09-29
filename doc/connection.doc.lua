@@ -1,6 +1,11 @@
 ---@class ConnectionModule
 ---@field init_host fun()
----@field init_client fun(ipAdress: string): boolean
+---@field init_client fun(connectionData: ConnectionData): boolean
 ---@field send_game_data fun(data: table)
+---@field start_game fun(color: string)
+---@field end_game fun()
 ---@field update fun()
----@field disconnect fun()
+
+---@class ConnectionData
+---@field name string
+---@field key string?

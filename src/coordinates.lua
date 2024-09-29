@@ -1,15 +1,16 @@
----@diagnostic disable: missing-parameter
+---@type Modules
+local M = import "modules"
 local letters = { "A", "B", "C", "D", "E", "F", "G", "H" }
 
-local font = love.graphics.newFont(20)
-love.graphics.setDefaultFilter("nearest")
-love.graphics.setFont(font)
-local letterW, letterH = font:getWidth("0"), font:getHeight("0")
+local translation = { 8, 7, 6, 5, 4, 3, 2, 1 }
+local font, letterW, letterH
 local hostColor
 
 return {
     ---@param color string
     init = function(color)
+        font = M.font.get_font(20)
+        letterW, letterH = M.font.get_text_dimensions(font, "0")
         hostColor = color
     end,
 
@@ -27,12 +28,18 @@ return {
         end
     end,
 
+    ---@param pos Position
+    translate = function(pos)
+        return translation[pos.x], translation[pos.y]
+    end,
+
     ---@param screenW number
     ---@param screenH number
     ---@param squareW number
     ---@param squareH number
     ---@param columnW number
     draw = function(screenW, screenH, squareW, squareH, columnW)
+        love.graphics.setFont(font)
         if hostColor == "white" then
             love.graphics.setColor(0, 0, 0)
             for i = 1, 8 do

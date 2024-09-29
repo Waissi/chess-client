@@ -16,7 +16,7 @@ local players = {
 
 return {
     ---@param color string
-    init = function(color)
+    get_player = function(color)
         return players[color]
     end,
 

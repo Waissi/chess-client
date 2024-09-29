@@ -4,6 +4,7 @@
 ---@field menu MenuModule
 ---@field button ButtonModule
 ---@field label LabelModule
+---@field panel PanelModule
 ---@field inputBox InputBoxModule
 ---@field players PlayerModule
 ---@field movement MovementModule
@@ -12,3 +13,7 @@
 ---@field square SquareModule
 ---@field interface PieceModule
 ---@field connection ConnectionModule
+---@field readwrite ReadwriteModule
+---@field window WindowModule
+---@field font FontModule
+---@field position PositionModule

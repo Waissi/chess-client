@@ -18,9 +18,6 @@ function love.update()
 end
 
 function love.keypressed(key)
-    if key == "p" then
-        M.connection.send_game_data({})
-    end
     return M.hud.on_key_pressed(key)
 end
 
@@ -29,7 +26,7 @@ function love.textinput(char)
 end
 
 function love.mousepressed(x, y, button)
-    if M.hud.on_mouse_pressed(button) then return end
+    if M.hud.on_mouse_pressed(x, y, button) then return end
     M.game.on_mouse_pressed(x, y, button)
 end
 
@@ -46,5 +43,5 @@ function love.draw()
 end
 
 function love.quit()
-    M.connection.disconnect()
+    M.connection.end_game()
 end

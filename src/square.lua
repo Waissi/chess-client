@@ -1,6 +1,7 @@
 local white = { 1, 1, .8 }
 local black = { 0, 0, 0 }
 
+local defaultLineWidth = love.graphics.getLineWidth()
 return {
     ---@param x number
     ---@param y number
@@ -55,5 +56,6 @@ return {
         love.graphics.setLineWidth(4)
         love.graphics.rectangle("line", square.x, square.y, square.w, square.h)
         love.graphics.setColor(1, 1, 1)
+        love.graphics.setLineWidth(defaultLineWidth)
     end
 }

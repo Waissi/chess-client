@@ -1,5 +1,5 @@
 ---@class PlayerModule
----@field init fun(color: string): Player
+---@field get_player fun(color: string): Player
 ---@field next fun(currentPlayer: Player): Player
 ---@field set_last_piece fun(piece: Piece)
 ---@field get_last_piece_played fun(): Piece

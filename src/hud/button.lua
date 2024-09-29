@@ -1,3 +1,6 @@
+---@type Modules
+local M = import "modules"
+
 return setmetatable({
         ---@param self ButtonModule
         ---@param x number
@@ -5,17 +8,19 @@ return setmetatable({
         ---@param w number
         ---@param h number
         ---@param text string
+        ---@param fontSize number
         ---@param callback function
-        new = function(self, x, y, w, h, text, callback)
+        new = function(self, x, y, w, h, text, fontSize, callback)
             return setmetatable({
                     x = x,
                     y = y,
                     w = w,
                     h = h,
-                    text = text,
+                    label = M.label:new(x + w / 2, y + h / 2, text, fontSize),
                     callback = callback,
                     state = "idle",
-                    color = { .25, .2, .2 }
+                    color = { .25, .2, .2 },
+                    labelColor = { 1, 1, 1 }
                 },
                 { __index = self })
         end,
@@ -42,11 +47,10 @@ return setmetatable({
         ---@param button Button
         draw = function(button)
             love.graphics.setColor(button.color)
-            love.graphics.rectangle("fill", button.x, button.y, button.w, button.h)
+            love.graphics.rectangle("fill", button.x, button.y, button.w, button.h, 4, 4)
             love.graphics.setColor(0, 0, 0)
-            love.graphics.rectangle("line", button.x, button.y, button.w, button.h)
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.print(button.text, button.x, button.y)
+            love.graphics.rectangle("line", button.x, button.y, button.w, button.h, 4, 4)
+            button.label:draw(button.labelColor)
         end
     },
     {

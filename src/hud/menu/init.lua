@@ -2,14 +2,19 @@ local menus = {
     start = import "startMenu",
     connection = import "connectionMenu",
     game = import "gameMenu",
-    client = import "clientMenu"
+    client = import "clientMenu",
+    userName = import "userName",
+    threefold = import "threefold",
+    fivefold = import "fivefold"
 }
 
 return {
 
     ---@param name string
-    init = function(name)
-        return menus[name]()
+    ---@param windowW number
+    ---@param windowH number
+    init = function(name, windowW, windowH)
+        return menus[name](windowW, windowH)
     end,
 
     ---@param menu Menu
@@ -34,9 +39,11 @@ return {
     end,
 
     ---@param menu Menu
-    on_mouse_pressed = function(menu)
+    ---@param x number
+    ---@param y number
+    on_mouse_pressed = function(menu, x, y)
         for _, widget in ipairs(menu.widgets) do
-            if widget:on_mouse_pressed() then return true end
+            widget:on_mouse_pressed(x, y)
         end
     end,
 

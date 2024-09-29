@@ -1,0 +1,3 @@
+---@class PositionModule
+---@field init_start_positions fun(color: string): table
+---@field get_repetition fun(pieces: table<string, Piece[]>): number
