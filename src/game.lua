@@ -253,6 +253,28 @@ return {
         if not piece then
             error("something went wrong")
         end
+        if piece.type == "king" then
+            local diff = newSquare.gridPos.x - pieceSquare.gridPos.x
+            if math.abs(diff) == 2 then
+                local dir = diff > 0 and "right" or "left"
+                local towerX = dir == "right" and 8 or 1
+                local towerSquare = game.board[1][towerX]
+                local mvt
+                if piece.color == "white" then
+                    mvt = dir == "right" and -3 or 2
+                else
+                    mvt = dir == "left" and 3 or -2
+                end
+                local newTowerSqaure = game.board[1][towerX + mvt]
+                local tower = towerSquare.piece
+                if not tower then
+                    error("something went wrong")
+                end
+                M.square.free(towerSquare)
+                M.square.occupy(newTowerSqaure, tower)
+                tower:move(newTowerSqaure)
+            end
+        end
         piece:move(newSquare)
         M.square.free(pieceSquare)
         M.square.occupy(newSquare, piece)

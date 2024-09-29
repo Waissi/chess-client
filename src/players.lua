@@ -58,17 +58,20 @@ return {
         local nextSquare = board[king.y][king.x + movement]
         if nextSquare.piece then return end
         local x = dir == "left" and 1 or 8
-        local y = king.color == "black" and 1 or 8
-        if not (square.gridPos.y == y) then return end
-        local tower = board[y][x].piece
+        local tower = board[8][x].piece
         if not tower or tower.hasMoved then return end
-        if dir == "left" and board[y][tower.x + 1].piece then return end
-        local towerMovement = dir == "left" and 3 or -2
+        if dir == "left" and board[8][tower.x + 1].piece then return end
+        local towerMovement
+        if king.color == "white" then
+            towerMovement = dir == "left" and 3 or -2
+        else
+            towerMovement = dir == "right" and -3 or 2
+        end
         return true,
             {
                 tower = tower,
-                lastPos = board[y][tower.x],
-                newPos = board[y][tower.x + towerMovement],
+                lastPos = board[8][tower.x],
+                newPos = board[8][tower.x + towerMovement],
                 intermediate = nextSquare
             }
     end,

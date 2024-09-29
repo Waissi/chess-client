@@ -8,6 +8,8 @@ return function(windowW, windowH)
     local font = M.font.get_font(20)
     local charW, charH = M.font.get_text_dimensions(font, '0')
     local passkeyW, passkeyH = charW * 20, charW * 2
+    local connectText = "CONNECT"
+    local connectW = font:getWidth(connectText)
 
     ---@type Widget[]
     local widgets = {}
@@ -17,9 +19,8 @@ return function(windowW, windowH)
     widgets[#widgets + 1] = M.label:new(windowW / 4, windowH / 2, "NAME", 20)
     local name = M.inputBox:new(windowW / 4 - passkeyW / 2, windowH / 2 + passkeyH, passkeyW, passkeyH, 20)
     widgets[#widgets + 1] = name
-    widgets[#widgets + 1] = M.button:new(windowW / 4 - passkeyW / 2, windowH / 2 + passkeyH * 3, passkeyW, passkeyH,
-        "CONNECT", 20,
-        function()
+    widgets[#widgets + 1] = M.button:new(windowW / 4 - (connectW / 2 + charW), windowH / 2 + passkeyH * 3,
+        connectW + charW * 2, passkeyH, connectText, 20, function()
             local connectionName = name:get_value()
             local connectionKey = passkey:get_value()
             if not connectionName and connectionKey then return end

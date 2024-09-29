@@ -65,9 +65,12 @@ return setmetatable(
         ---@param piece Piece
         ---@param square Square
         can_promote = function(piece, square)
-            if not (square.gridPos.y == 1) then return end
-            if square.piece and square.piece.type == "king" then return end
-            return math.abs(square.gridPos.y - piece.y) == 1
+            if not (square.gridPos.y == 1) or not (math.abs(square.gridPos.y - piece.y) == 1) then return end
+            if square.piece then
+                if square.piece.type == "king" then return end
+                return math.abs(square.gridPos.x - piece.x) == 1
+            end
+            return math.abs(square.gridPos.x - piece.x) == 0
         end
 
     },
