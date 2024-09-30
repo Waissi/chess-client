@@ -17,3 +17,4 @@
 ---@field window WindowModule
 ---@field font FontModule
 ---@field position PositionModule
+---@field piece PieceModule

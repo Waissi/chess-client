@@ -142,6 +142,22 @@ return {
 
         ---@param piece Piece
         ---@param board Square[][]
+        ["queen"] = function(piece, board)
+            local squares = {}
+            traverse_board(board, squares, piece.x, piece.y, 0, -1)
+            traverse_board(board, squares, piece.x, piece.y, 0, 1)
+            traverse_board(board, squares, piece.x, piece.y, 1, 0)
+            traverse_board(board, squares, piece.x, piece.y, -1, 0)
+            traverse_board(board, squares, piece.x, piece.y, -1, -1)
+            traverse_board(board, squares, piece.x, piece.y, 1, -1)
+            traverse_board(board, squares, piece.x, piece.y, -1, 1)
+            traverse_board(board, squares, piece.x, piece.y, 1, 1)
+            validate_squares(squares, piece.color)
+            return squares
+        end,
+
+        ---@param piece Piece
+        ---@param board Square[][]
         ["king"] = function(piece, board)
             local squares = {}
             squares[#squares + 1] = get_vertical_square(piece, board, 1)

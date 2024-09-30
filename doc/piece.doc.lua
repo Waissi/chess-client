@@ -1,12 +1,10 @@
 ---@class PieceModule
----@field new fun(self: PieceModule, x: number, y: number, color: string): Piece
+---@field new fun(type: string, x: number, y: number, color: string): Piece
 ---@field on_hover fun(piece: Piece, hover: boolean)
 ---@field on_mouse_pressed fun(piece: Piece): boolean
 ---@field unselect fun(piece: Piece)
 ---@field can_move fun(piece: Piece, square: Square, board: Square[][]): boolean
 ---@field move fun(piece: Piece, square: Square)
----@field en_passant fun(piece: Piece, square: Square, board: Square[][]): Piece
----@field can_promote fun(piece: Piece, square: Square): boolean
 
 ---@class Piece: PieceModule
 ---@field type string
@@ -15,4 +13,4 @@
 ---@field y number
 ---@field color string
 ---@field img love.Texture
----@field hasMoved boolean?
+---@field hasMoved boolean

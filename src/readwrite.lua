@@ -1,8 +1,7 @@
 local json = import "json"
 local userFile = "settings.txt"
 local connectionsFile = "savedconnections.txt"
-local savedConnections
-local settings
+local settings, savedConnections
 
 ---@param newConnection ConnectionData
 local is_known_connection = function(newConnection)

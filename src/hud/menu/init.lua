@@ -5,7 +5,8 @@ local menus = {
     client = import "clientMenu",
     userName = import "userName",
     threefold = import "threefold",
-    fivefold = import "fivefold"
+    fivefold = import "fivefold",
+    checkmate = import "checkmate"
 }
 
 return {

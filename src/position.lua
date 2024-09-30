@@ -108,6 +108,7 @@ local are_positions_similar = function(newPos, existingPos)
     return true
 end
 
+---@param newPosition table
 local get_existing_position = function(newPosition)
     for _, gamePosition in ipairs(gamePositions) do
         local position = gamePosition.position

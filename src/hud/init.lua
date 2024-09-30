@@ -16,7 +16,8 @@ return {
             client = M.menu.init("client", width, height),
             userName = M.menu.init("userName", width, height),
             threefold = M.menu.init("threefold", width, height),
-            fivefold = M.menu.init("fivefold", width, height)
+            fivefold = M.menu.init("fivefold", width, height),
+            checkmate = M.menu.init("checkmate", width, height)
         }
         local userName = M.readwrite.get_user_name()
         currentMenu = userName and "connection" or "userName"

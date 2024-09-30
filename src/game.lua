@@ -1,16 +1,6 @@
 ---@type Modules
 local M = import "modules"
 
----@type PieceModule[]
-local pieces = {
-    pawn = import "pawn",
-    rook = import "rook",
-    knight = import "knight",
-    bishop = import "bishop",
-    queen = import "queen",
-    king = import "king",
-}
-
 ---@type Piece?
 local selectedPiece
 
@@ -24,9 +14,8 @@ local currentPlayer
 local game
 local is_valid_move = function()
     if not game then return end
-    local king = M.players.get_current_player_king(currentPlayer, game.pieces)
-    M.players.inspect_check(king, game.pieces, game.board)
-    return not currentPlayer.check
+    local king = M.players.get_king(playerColor, game.pieces)
+    return not M.players.inspect_check(king, game.pieces, game.board)
 end
 
 ---@param currentPiece Piece
@@ -34,7 +23,7 @@ end
 ---@param deadPawn Piece?
 ---@param promotion string?
 local next_turn = function(currentPiece, previousPos, deadPawn, promotion)
-    currentPiece:unselect()
+    M.piece.unselect(currentPiece)
     selectedPiece = nil
     currentPlayer = M.players.next(currentPlayer)
     M.connection.send_game_data({
@@ -47,13 +36,46 @@ local next_turn = function(currentPiece, previousPos, deadPawn, promotion)
     })
 end
 
+local is_checkmate = function()
+    if not game then return end
+    local king = M.players.get_king(playerColor, game.pieces)
+    for _, piece in ipairs(game.pieces[playerColor]) do
+        local currentSquare = game.board[piece.y][piece.x]
+        local squares = M.movement.get_possible_squares(piece.type, piece, game.board)
+        for _, square in ipairs(squares) do
+            local deadPiece
+            if square.piece and not (square.piece.type == "king") then
+                deadPiece = square.piece
+                table.delete(game.pieces[square.piece.color], square.piece)
+                M.square.free(square)
+            end
+            M.square.free(currentSquare)
+            M.square.occupy(square, piece)
+            local hasMoved = piece.hasMoved
+            M.piece.move(piece, square)
+            local check = M.players.inspect_check(king, game.pieces, game.board)
+            M.square.free(square)
+            M.square.occupy(currentSquare, piece)
+            M.piece.move(piece, currentSquare)
+            piece.hasMoved = hasMoved
+            if deadPiece then
+                table.insert(game.pieces[deadPiece.color], deadPiece)
+                M.square.occupy(square, deadPiece)
+            end
+            if not check then return end
+        end
+    end
+    return true
+end
+
 return {
     ---@param color string
     init = function(color)
         playerColor = color
-        currentPlayer = M.players.get_player("white")
+        M.players.init()
         M.movement.init(playerColor)
         M.coordinates.init(playerColor)
+        currentPlayer = M.players.get_player("white")
         game = {
             board = M.board.new(),
             pieces = {
@@ -66,7 +88,7 @@ return {
             for letter, piece in pairs(list) do
                 local x = M.coordinates.get_index(letter)
                 local y = number
-                table.insert(game.pieces[piece.color], pieces[piece.type]:new(x, y, piece.color))
+                table.insert(game.pieces[piece.color], M.piece.new(piece.type, x, y, piece.color))
             end
         end
 
@@ -98,7 +120,7 @@ return {
             local square = game.board[piece.y][piece.x]
             local isHovered = M.square.is_hovered(square, x, y)
             hover = isHovered and true or hover
-            piece:on_hover(isHovered)
+            M.piece.on_hover(piece, isHovered)
         end
         return hover
     end,
@@ -111,19 +133,19 @@ return {
         if not (currentPlayer.color == playerColor) then return end
         if button == 2 then
             if not selectedPiece then return end
-            selectedPiece:unselect()
+            M.piece.unselect(selectedPiece)
             selectedPiece = nil
             return
         end
         if selectedPiece then
             local currentSquare = game.board[selectedPiece.y][selectedPiece.x]
             local square = M.board.get_hovered_square(game.board, x, y)
-            local opponentKing = M.players.get_opponent_king(currentPlayer, game.pieces)
+            local opponentKing = M.players.get_opponent_king(playerColor, game.pieces)
             local kingSquare = game.board[opponentKing.y][opponentKing.x]
             if square and not (square == kingSquare) then
                 if selectedPiece.type == "pawn" then
-                    if selectedPiece:can_promote(square) then
-                        local newQueen = pieces["queen"]:new(square.gridPos.x, square.gridPos.y, selectedPiece.color)
+                    if M.players.can_promote(selectedPiece, square) then
+                        local newQueen = M.piece.new("queen", square.gridPos.x, square.gridPos.y, selectedPiece.color)
                         table.delete(game.pieces[selectedPiece.color], selectedPiece)
                         table.insert(game.pieces[selectedPiece.color], newQueen)
                         local deadPiece = square.piece
@@ -148,19 +170,19 @@ return {
                         return
                     end
                     if M.players.can_perform_en_passant(currentPlayer) then
-                        local deadPawn = selectedPiece:en_passant(square, game.board)
+                        local deadPawn = M.players.get_dead_pawn_en_passant(selectedPiece, square, game.board)
                         if deadPawn then
                             local deadPawnSquare = game.board[deadPawn.y][deadPawn.x]
                             table.delete(game.pieces[deadPawn.color], deadPawn)
                             M.square.free(currentSquare)
                             M.square.free(deadPawnSquare)
                             M.square.occupy(square, selectedPiece)
-                            selectedPiece:move(square)
+                            M.piece.move(selectedPiece, square)
                             if is_valid_move(game) then
                                 next_turn(selectedPiece, currentSquare.gridPos, deadPawn)
                                 return
                             end
-                            selectedPiece:move(currentSquare)
+                            M.piece.move(selectedPiece, currentSquare)
                             M.square.free(square)
                             M.square.occupy(currentSquare, selectedPiece)
                             if deadPawn then
@@ -175,12 +197,12 @@ return {
                 if castling then
                     M.square.occupy(castlingMovement.intermediate, selectedPiece)
                     M.square.free(currentSquare)
-                    selectedPiece:move(castlingMovement.intermediate)
-                    M.players.inspect_check(selectedPiece, game.pieces, game.board)
+                    M.piece.move(selectedPiece, castlingMovement.intermediate)
+                    local check = M.players.inspect_check(selectedPiece, game.pieces, game.board)
                     M.square.free(castlingMovement.intermediate)
                     M.square.occupy(currentSquare, selectedPiece)
-                    if currentPlayer.check then
-                        selectedPiece:move(currentSquare)
+                    if check then
+                        M.piece.move(selectedPiece, currentSquare)
                         selectedPiece.hasMoved = false
                         return
                     end
@@ -188,35 +210,35 @@ return {
                     M.square.occupy(castlingMovement.newPos, castlingMovement.tower)
                     M.square.free(currentSquare)
                     M.square.free(castlingMovement.lastPos)
-                    selectedPiece:move(square)
-                    castlingMovement.tower:move(castlingMovement.newPos)
+                    M.piece.move(selectedPiece, square)
+                    M.piece.move(castlingMovement.tower, castlingMovement.newPos)
                     if is_valid_move(game) then
                         next_turn(selectedPiece, currentSquare.gridPos)
                         return
                     end
                     selectedPiece.hasMoved = false
-                    selectedPiece:move(currentSquare)
+                    M.piece.move(selectedPiece, currentSquare)
                     castlingMovement.tower.hasMoved = false
-                    castlingMovement.tower:move(castlingMovement.lastPos)
+                    M.piece.move(castlingMovement.tower, castlingMovement.lastPos)
                     M.square.free(square)
                     M.square.occupy(currentSquare, selectedPiece)
                     M.square.free(castlingMovement.newPos)
                     M.square.occupy(castlingMovement.lastPos, castlingMovement.tower)
                     return
                 end
-                if selectedPiece:can_move(square, game.board) then
+                if M.piece.can_move(selectedPiece, square, game.board) then
                     local deadPiece = square.piece
                     if deadPiece then
                         table.delete(game.pieces[square.piece.color], deadPiece)
                     end
                     M.square.free(currentSquare)
                     M.square.occupy(square, selectedPiece)
-                    selectedPiece:move(square)
+                    M.piece.move(selectedPiece, square)
                     if is_valid_move(game) then
                         next_turn(selectedPiece, currentSquare.gridPos)
                         return
                     end
-                    selectedPiece:move(currentSquare)
+                    M.piece.move(selectedPiece, currentSquare)
                     M.square.free(square)
                     M.square.occupy(currentSquare, selectedPiece)
                     if deadPiece then
@@ -228,9 +250,9 @@ return {
             end
         end
         for _, piece in ipairs(game.pieces[playerColor]) do
-            if piece:on_mouse_pressed() then
+            if M.piece.on_mouse_pressed(piece) then
                 if selectedPiece then
-                    selectedPiece:unselect()
+                    M.piece.unselect(selectedPiece)
                 end
                 selectedPiece = piece
                 return
@@ -254,6 +276,7 @@ return {
             error("something went wrong")
         end
         if piece.type == "king" then
+            --check if we are performing castling
             local diff = newSquare.gridPos.x - pieceSquare.gridPos.x
             if math.abs(diff) == 2 then
                 local dir = diff > 0 and "right" or "left"
@@ -272,18 +295,18 @@ return {
                 end
                 M.square.free(towerSquare)
                 M.square.occupy(newTowerSqaure, tower)
-                tower:move(newTowerSqaure)
+                M.piece.move(tower, newTowerSqaure)
             end
         end
-        piece:move(newSquare)
+        M.piece.move(piece, newSquare)
         M.square.free(pieceSquare)
         M.square.occupy(newSquare, piece)
         if gameData.promotion then
-            local newPiece = pieces[gameData.promotion]:new(0, 0, piece.color)
+            local newPiece = M.piece.new(gameData.promotion, 0, 0, piece.color)
             table.insert(game.pieces[piece.color], newPiece)
             table.delete(game.pieces[piece.color], piece)
             M.square.free(newSquare)
-            newPiece:move(newSquare)
+            M.piece.move(newPiece, newSquare)
             M.square.occupy(newSquare, newPiece)
         end
         if gameData.deadPawn then
@@ -303,6 +326,13 @@ return {
         elseif repetition == 5 then
             M.hud.push_menu("fivefold")
             return
+        end
+        local king = M.players.get_king(playerColor, game.pieces)
+        if M.players.inspect_check(king, game.pieces, game.board) then
+            if is_checkmate() then
+                M.hud.push_menu("checkmate")
+                return
+            end
         end
         currentPlayer = M.players.get_player(playerColor)
     end,
