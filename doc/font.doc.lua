@@ -1,0 +1,3 @@
+---@class FontModule
+---@field get_font fun(size: number): love.Font
+---@field get_text_dimensions fun(font: love.Font, text: string): number, number

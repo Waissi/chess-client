@@ -1,0 +1,2 @@
+---@class WindowModule
+---@field get_dimensions fun(): number, number

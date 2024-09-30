@@ -1,3 +1,6 @@
+---@type Modules
+local M = import "modules"
+
 ---@type Piece
 local lastPiece
 
@@ -15,8 +18,24 @@ local players = {
 }
 
 return {
+
+    init = function()
+        players = {
+            white = {
+                color = "white",
+                check = false,
+                enPassantVulnerable = false
+            },
+            black = {
+                color = "black",
+                check = false,
+                enPassantVulnerable = false
+            }
+        }
+    end,
+
     ---@param color string
-    init = function(color)
+    get_player = function(color)
         return players[color]
     end,
 
@@ -28,10 +47,6 @@ return {
     ---@param piece Piece
     set_last_piece = function(piece)
         lastPiece = piece
-    end,
-
-    get_last_piece_played = function()
-        return lastPiece
     end,
 
     ---@param color string
@@ -46,6 +61,38 @@ return {
         return players[color].enPassantVulnerable
     end,
 
+    ---@param piece Piece
+    ---@param square Square
+    ---@param board Square[][]
+    get_dead_pawn_en_passant = function(piece, square, board)
+        local leftSquare = board[piece.y][piece.x - 1]
+        local rightSquare = board[piece.y][piece.x + 1]
+        local leftPawn = leftSquare and
+            leftSquare.piece and
+            leftSquare.piece.type == "pawn" and
+            leftSquare.piece == lastPiece and
+            leftSquare.piece
+        local rightPawn = rightSquare and
+            rightSquare.piece and
+            rightSquare.piece.type == "pawn" and
+            rightSquare.piece == lastPiece and
+            rightSquare.piece
+        if not leftPawn and not rightPawn then return end
+        if leftPawn and leftPawn.x == square.gridPos.x and math.abs(square.gridPos.y - leftPawn.y) == 1 then
+            return leftPawn
+        end
+        if rightPawn and rightPawn.x == square.gridPos.x and math.abs(square.gridPos.y - rightPawn.y) == 1 then
+            return rightPawn
+        end
+    end,
+
+    ---@param piece Piece
+    ---@param square Square
+    can_promote = function(piece, square)
+        if not (square.gridPos.y == 1) or not (math.abs(square.gridPos.y - piece.y) == 1) then return end
+        return math.abs(square.gridPos.x - piece.x) == (square.piece and 1 or 0)
+    end,
+
     ---@param king Piece
     ---@param square Square
     ---@param board Square[][]
@@ -58,17 +105,20 @@ return {
         local nextSquare = board[king.y][king.x + movement]
         if nextSquare.piece then return end
         local x = dir == "left" and 1 or 8
-        local y = king.color == "black" and 1 or 8
-        if not (square.gridPos.y == y) then return end
-        local tower = board[y][x].piece
+        local tower = board[8][x].piece
         if not tower or tower.hasMoved then return end
-        if dir == "left" and board[y][tower.x + 1].piece then return end
-        local towerMovement = dir == "left" and 3 or -2
+        if dir == "left" and board[8][tower.x + 1].piece then return end
+        local towerMovement
+        if king.color == "white" then
+            towerMovement = dir == "left" and 3 or -2
+        else
+            towerMovement = dir == "right" and -3 or 2
+        end
         return true,
             {
                 tower = tower,
-                lastPos = board[y][tower.x],
-                newPos = board[y][tower.x + towerMovement],
+                lastPos = board[8][tower.x],
+                newPos = board[8][tower.x + towerMovement],
                 intermediate = nextSquare
             }
     end,
@@ -77,22 +127,23 @@ return {
     ---@param pieces Piece[]
     ---@param board Square[][]
     inspect_check = function(king, pieces, board)
-        local color = king.color == "white" and "black" or "white"
+        local opponentColor = king.color == "white" and "black" or "white"
         local kingSquare = board[king.y][king.x]
         local check = false
-        for _, piece in ipairs(pieces[color]) do
-            if piece:can_move(kingSquare, board) then
+        for _, piece in ipairs(pieces[opponentColor]) do
+            if M.piece.can_move(piece, kingSquare, board) then
                 check = true
                 break
             end
         end
         players[king.color].check = check
+        return check
     end,
 
-    ---@param currentPlayer Player
+    ---@param playerColor string
     ---@param pieces Piece[]
-    get_current_player_king = function(currentPlayer, pieces)
-        for _, piece in ipairs(pieces[currentPlayer.color]) do
+    get_king = function(playerColor, pieces)
+        for _, piece in ipairs(pieces[playerColor]) do
             if piece.type == "king" then
                 return piece
             end
@@ -100,10 +151,10 @@ return {
         error("A king should always be there")
     end,
 
-    ---@param currentPlayer Player
+    ---@param playerColor string
     ---@param pieces Piece[]
-    get_opponent_king = function(currentPlayer, pieces)
-        local color = currentPlayer.color == "white" and "black" or "white"
+    get_opponent_king = function(playerColor, pieces)
+        local color = playerColor == "white" and "black" or "white"
         for _, piece in ipairs(pieces[color]) do
             if piece.type == "king" then
                 return piece

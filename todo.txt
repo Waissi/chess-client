@@ -1,3 +1,2 @@
 -checkmate
--multiplayer
-- threehold and fivehold repetition
+-peer to peer

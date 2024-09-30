@@ -1,7 +1,10 @@
 ---@class GameModule
 ---@field init fun()
+---@field release fun()
+---@field continue_playing fun()
 ---@field on_mouse_moved fun(x: number, y: number): boolean
 ---@field on_mouse_pressed fun(x: number, y: number, button: number)
+---@field receive_game_data fun(data: table)
 ---@field draw fun()
 
 ---@class Game

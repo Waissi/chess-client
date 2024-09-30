@@ -2,13 +2,14 @@
 local M = import "modules"
 
 local columnW = 25
-local width, height = love.graphics.getDimensions()
-local squareW, squareH = (width - columnW * 2) / 8, (height - columnW * 2) / 8
 local beige = { .75, .7, .6 }
 local brown = { .25, .2, .2 }
+local width, height, squareW, squareH
 
 return {
     new = function()
+        width, height = M.window.get_dimensions()
+        squareW, squareH = (width - columnW * 2) / 8, (height - columnW * 2) / 8
         local grid = {}
         for j = 1, 8 do
             grid[j] = {}
@@ -38,7 +39,6 @@ return {
 
     ---@param board Square[][]
     draw = function(board)
-        love.graphics.clear(beige)
         for j = 1, 8 do
             for i = 1, 8 do
                 M.square.draw(board[j][i])
