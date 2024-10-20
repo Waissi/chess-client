@@ -1,12 +1,10 @@
 local menus = {
     start = import "startMenu",
     connection = import "connectionMenu",
-    game = import "gameMenu",
-    client = import "clientMenu",
-    userName = import "userName",
     threefold = import "threefold",
     fivefold = import "fivefold",
-    checkmate = import "checkmate"
+    checkmate = import "checkmate",
+    victory = import "victory"
 }
 
 return {

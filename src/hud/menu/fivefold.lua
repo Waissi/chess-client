@@ -21,13 +21,13 @@ return function(windowW, windowH)
             M.label:new(windowW / 2, windowH / 2 - charH * 2, labelText, 30),
             M.button:new(windowW / 2 - drawW / 2, windowH / 2, drawW, charH, quitText, 30,
                 function()
-                    M.game.release()
-                    M.hud.push_menu("connection")
+                    love.event.quit()
                 end),
             M.button:new(windowW / 2 - continueW / 2, windowH / 2 + charH * 2, continueW, charH, newgameText, 30,
                 function()
                     M.game.release()
-                    M.hud.push_menu("start")
+                    M.hud.pop_menu()
+                    M.connection.new_game()
                 end),
         }
     }

@@ -6,22 +6,3 @@ table.delete = function(tab, element)
         end
     end
 end
-
-table.combine = function(tab1, tab2)
-    local tab = {}
-    for index, value in pairs(tab1) do
-        if type(index) == "number" then
-            tab[#tab + 1] = value
-        else
-            tab[index] = value
-        end
-    end
-    for index, value in pairs(tab2) do
-        if type(index) == "number" then
-            tab[#tab + 1] = value
-        else
-            tab[index] = value
-        end
-    end
-    return tab
-end

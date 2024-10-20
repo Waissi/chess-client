@@ -7,16 +7,15 @@ return {
     ---@param y number
     ---@param w number
     ---@param h number
-    ---@param gridPos Position
+    ---@param pos Position
     ---@param color string
-    new = function(x, y, w, h, gridPos, color)
+    new = function(x, y, w, h, pos, color)
         return {
-            x = x,
-            y = y,
             w = w,
             h = h,
-            gridPos = gridPos,
-            color = color
+            pos = pos,
+            color = color,
+            drawPos = { x = x, y = y }
         }
     end,
 
@@ -35,26 +34,26 @@ return {
     ---@param x number
     ---@param y number
     is_hovered = function(square, x, y)
-        return x > square.x and
-            x < square.x + square.w and
-            y > square.y and
-            y < square.y + square.h
+        return x > square.drawPos.x and
+            x < square.drawPos.x + square.w and
+            y > square.drawPos.y and
+            y < square.drawPos.y + square.h
     end,
 
     ---@param square Square
     draw = function(square)
         love.graphics.setColor(square.color)
-        love.graphics.rectangle("fill", square.x, square.y, square.w, square.h)
+        love.graphics.rectangle("fill", square.drawPos.x, square.drawPos.y, square.w, square.h)
         love.graphics.setColor(black)
         love.graphics.setLineWidth(2)
-        love.graphics.rectangle("line", square.x, square.y, square.w, square.h)
+        love.graphics.rectangle("line", square.drawPos.x, square.drawPos.y, square.w, square.h)
     end,
 
     ---@param square Square
     draw_selected = function(square)
         love.graphics.setColor(white)
         love.graphics.setLineWidth(4)
-        love.graphics.rectangle("line", square.x, square.y, square.w, square.h)
+        love.graphics.rectangle("line", square.drawPos.x, square.drawPos.y, square.w, square.h)
         love.graphics.setColor(1, 1, 1)
         love.graphics.setLineWidth(defaultLineWidth)
     end

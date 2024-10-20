@@ -22,7 +22,7 @@ local function set_paths(path, folderName)
 end
 set_paths("src", "src")
 
----@type fun(name: string): any
+---@type fun(name: string): table
 import = function(moduleName)
     assert(paths[moduleName], "The module " .. moduleName .. " does not exist")
     return require(paths[moduleName])

@@ -2,15 +2,12 @@
 ---@field new fun(type: string, x: number, y: number, color: string): Piece
 ---@field on_hover fun(piece: Piece, hover: boolean)
 ---@field on_mouse_pressed fun(piece: Piece): boolean
----@field unselect fun(piece: Piece)
----@field can_move fun(piece: Piece, square: Square, board: Square[][]): boolean
+---@field unselect fun(piece: Piece?)
 ---@field move fun(piece: Piece, square: Square)
 
 ---@class Piece: PieceModule
 ---@field type string
 ---@field state string
----@field x number
----@field y number
+---@field pos Position
 ---@field color string
 ---@field img love.Texture
----@field hasMoved boolean

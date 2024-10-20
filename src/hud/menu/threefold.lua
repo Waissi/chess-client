@@ -24,7 +24,7 @@ return function(windowW, windowH)
             M.button:new(windowW / 2 - continueW / 2, windowH / 2 + charH * 2, continueW, charH, continueText, 30,
                 function()
                     M.game.continue_playing()
-                    M.hud.push_menu("game")
+                    M.hud.pop_menu()
                 end),
         }
     }

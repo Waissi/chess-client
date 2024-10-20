@@ -1,2 +1,0 @@
--checkmate
--peer to peer

@@ -1,8 +1,8 @@
 ---@class ConnectionModule
----@field init_host fun()
----@field init_client fun(connectionData: ConnectionData): boolean
+---@field init fun()
 ---@field send_game_data fun(data: table)
----@field start_game fun(color: string)
+---@field new_game fun()
+---@field start_game fun(previousColor: string, newColor: string)
 ---@field end_game fun()
 ---@field update fun()
 

@@ -3,33 +3,22 @@ local M = import "modules"
 local letters = { "A", "B", "C", "D", "E", "F", "G", "H" }
 
 local translation = { 8, 7, 6, 5, 4, 3, 2, 1 }
-local font, letterW, letterH
+
+local font = M.font.get_font(20)
+local letterW, letterH = M.font.get_text_dimensions(font, "0")
+
+---@type string
 local hostColor
 
 return {
     ---@param color string
     init = function(color)
-        font = M.font.get_font(20)
-        letterW, letterH = M.font.get_text_dimensions(font, "0")
         hostColor = color
-    end,
-
-    ---@param index number
-    get_letter = function(index)
-        return letters[index]
-    end,
-
-    ---@param letter string
-    get_index = function(letter)
-        for key, value in ipairs(letters) do
-            if value == letter then
-                return key
-            end
-        end
     end,
 
     ---@param pos Position
     translate = function(pos)
+        if hostColor == "white" then return pos.x, pos.y end
         return translation[pos.x], translation[pos.y]
     end,
 

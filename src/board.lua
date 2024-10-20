@@ -29,9 +29,9 @@ return {
     get_hovered_square = function(board, x, y)
         for j = 1, 8 do
             for i = 1, 8 do
-                local boardSquare = board[j][i]
-                if M.square.is_hovered(boardSquare, x, y) then
-                    return boardSquare
+                local square = board[j][i]
+                if M.square.is_hovered(square, x, y) then
+                    return square
                 end
             end
         end
