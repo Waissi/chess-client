@@ -7,8 +7,6 @@
     "Lua.diagnostics.globals": [
         "switch",
         "import",
-        "static",
-        "signal"
     ],
     "Lua.diagnostics.disable": [
         "redundant-parameter",
