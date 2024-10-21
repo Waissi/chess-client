@@ -4,7 +4,7 @@ local M = import "modules"
 ---@param windowW number
 ---@param windowH number
 return function(windowW, windowH)
-    local victoryText = "VICTORY!"
+    local victoryText = "YOU WIN!"
 
     return {
         widgets = {
