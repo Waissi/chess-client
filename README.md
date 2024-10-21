@@ -13,4 +13,4 @@ You need to install Löve and have it in your path, then simply run
 love .
 ```
 
-![screenshot]([assets/screenshot.png](https://github.com/Waissi/chess-client/blob/b017206a9ba85df5c3166675e0bb646feaf07074/assets/screenshot.png))
+![screenshot](https://github.com/Waissi/chess-client/blob/b017206a9ba85df5c3166675e0bb646feaf07074/assets/screenshot.png)
