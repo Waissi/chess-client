@@ -106,6 +106,10 @@ jobs:
     needs: LOVE
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/download-artifact@master
+      with:
+        name: love_file
+        path: archive
     - name: Update APT
       run: sudo apt-get update
     - name: Install Dependencies
@@ -146,13 +150,11 @@ jobs:
     - name: Build löve AppImage
       run: |
         make LOVE_BRANCH=main
-    - uses: actions/download-artifact@master
-      with:
-        name: love_file
-        path: archive
     - name: build game appimage
       run: |
+        ls
         cd ..
+        ls
         ls love
         APPIMAGETOOLKIT=love/appimagetool
         LOVE=love/love-main.AppImage
