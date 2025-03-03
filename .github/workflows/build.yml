@@ -48,6 +48,7 @@ jobs:
         ls -R love_bin
 
   LINUX:
+    needs: LOVE
     runs-on: ubuntu-latest
     env:
       ALSOFT_CONF: love2d-${{ github.sha }}/testing/resources/alsoft.conf
