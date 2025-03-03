@@ -80,22 +80,20 @@ jobs:
       with:
         repository: love2d/love-appimage-source
         ref: main
-    - name: Checkout LÖVE
-      uses: actions/checkout@v4
-      with:
-        path: love2d-${{ github.sha }}
+    - name: clone love and apple dependencies
+      run: |
+          git clone https://github.com/love2d/love.git
+          cd love
     - name: Get Dependencies for AppImage
       shell: python
-      env:
-        LOVE_BRANCH: ${{ github.sha }}
       run: |
         import os
         for i in range(250):
-            if os.system(f"make getdeps LOVE_BRANCH={os.environ['LOVE_BRANCH']}") == 0:
+            if os.system(f"make getdeps LOVE_BRANCH=12") == 0:
                 raise SystemExit(0)
         raise Exception("make getdeps failed")
     - name: Build AppImage
-      run: make LOVE_BRANCH=${{ github.sha }}
+      run: make LOVE_BRANCH=12
     
     - uses: actions/download-artifact@master
       with:
