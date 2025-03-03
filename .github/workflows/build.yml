@@ -152,6 +152,12 @@ jobs:
         make LOVE_BRANCH=main
     - name: build game appimage
       run: |
+        echo "I AM HERE 1"
+        ls .
+        echo "I AM HERE 2"
+        cd love
+        echo "I AM HERE 3"
+        ls .
         APPIMAGETOOLKIT=love/appimagetool
         LOVE=love/love-main.AppImage
         chmod a+x $LOVE
