@@ -39,51 +39,12 @@ jobs:
       with:
         name: love_file
         path: archive
-    - name: clone love and apple dependencies
-      run: |
-        git clone https://github.com/love2d/love.git
-        git clone https://github.com/love2d/love-apple-dependencies.git
-        mv love-apple-dependencies/macOS/Frameworks love/platform/xcode/macosx
-    - name: build icon images
-      run: |
-        sips -z 16 16     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/16.png
-        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/32.png
-        sips -z 64 64     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/64.png
-        sips -z 128 128   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/128.png
-        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/256.png
-        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/512.png
-        sips -z 1024 1024 icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/1024.png
-        sips -z 16 16     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16.png
-        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16@2x.png
-        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32.png
-        sips -z 64 64     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32@2x.png
-        sips -z 128 128   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128.png
-        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128@2x.png
-        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256.png
-        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256@2x.png
-        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512.png
-        sips -z 1024 1024 icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512@2x.png
-    - name: compile löve
-      run: |
-        xcodebuild clean archive -project love/platform/xcode/love.xcodeproj -scheme love-macosx -configuration Release -destination generic/platform=macOS -archivePath love/love-macos.xcarchive
-        mv archive/$LOVE_ARCHIVE love/love-macos.xcarchive/Products/Applications/love.app/Contents/Resources
-        xcodebuild -exportArchive -archivePath love/love-macos.xcarchive -exportPath love-macos -exportOptionsPlist love/platform/xcode/macosx/macos-copy-app.plist
-    - name: modify plist file
-      run: |
-        mv love-macos/love.app $NAME.app
-        plutil -replace CFBundleIdentifier -string "com.Waissi.Chess" $NAME.app/Contents/Info.plist
-        plutil -replace CFBundleName -string "Chess" $NAME.app/Contents/Info.plist
-        plutil -replace CFBundleShortVersionString -string "0.1" $NAME.app/Contents/Info.plist
-        plutil -replace NSHumanReadableCopyright -string "@Waissi" $NAME.app/Contents/Info.plist
-        plutil -remove UTExportedTypeDeclarations $NAME.app/Contents/Info.plist
-        plutil -remove CFBundleDocumentTypes $NAME.app/Contents/Info.plist
-        plutil -convert xml1 $NAME.app/Contents/Info.plist
-        ditto -c -k --sequesterRsrc --keepParent $NAME.app $MACOS_BUILD
-    - name: create release
-      run: |
-        gh release upload v1 $MACOS_BUILD --clobber
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
+    - uses: actions/download-artifact@master
+      with:
+        repository: love2d/love
+        path: bin
+    - run: |
+        ls bin
 
   LINUX:
     needs: LOVE
