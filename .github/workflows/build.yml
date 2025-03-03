@@ -146,7 +146,6 @@ jobs:
     - name: Build AppImage
       run: |
         make LOVE_BRANCH=main
-        ls -R .
     - uses: actions/download-artifact@master
       with:
         name: love_file
@@ -158,8 +157,7 @@ jobs:
         chmod +x ./appimagetool-x86_64.AppImage
     - name: build appimage
       run: |
-        
-        LOVE="$(find love -type f -name  *.AppImage)"
+        LOVE=love/love-main.AppImage
         chmod a+x $LOVE
         APPIMAGETOOLKIT=./appimagetool-x86_64.AppImage
 
@@ -216,12 +214,12 @@ jobs:
     - name: compile love2d
       shell: bash
       run: |
-        git clone -b 12.x https://github.com/love2d/megasource megasource
+        git clone https://github.com/love2d/megasource megasource
         cd megasource
         git clone https://github.com/love2d/love libs/love
         rm libs/love/extra/windows/love.ico
         mv ../archive/icon.ico libs/love/extra/windows/love.ico
-        cmake -G "Visual Studio 17 2022" -A x64 -S. -Bbuild
+        cmake -G "Visual Studio 17 2022" -A x64 -S . -B build
         cmake --build build --target love/love --config Release
         cd ..
     - name: build exe
