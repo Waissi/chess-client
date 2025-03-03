@@ -93,7 +93,7 @@ jobs:
                 raise SystemExit(0)
         raise Exception("make getdeps failed")
     - name: Build AppImage
-      run: make LOVE_BRANCH=12
+      run: make LOVE_BRANCH=main
     
     - uses: actions/download-artifact@master
       with:
