@@ -106,10 +106,6 @@ jobs:
     needs: LOVE
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/download-artifact@master
-      with:
-        name: love_file
-        path: archive
     - name: Update APT
       run: sudo apt-get update
     - name: Install Dependencies
@@ -149,7 +145,11 @@ jobs:
         raise Exception("make getdeps failed")
     - name: Build löve AppImage
       run: |
-        make LOVE_BRANCH=main
+        make LOVE_BRANCH=main 
+    - uses: actions/download-artifact@master
+      with:
+        name: love_file
+        path: archive
     - name: build game appimage
       run: |
         APPIMAGETOOLKIT=./appimagetool
@@ -178,16 +178,16 @@ jobs:
         EOF
         cp $NAME.desktop squashfs-root
         mv $NAME.desktop squashfs-root/share/applications
-        cat squashfs-root/bin/love ../archive/$LOVE_ARCHIVE > squashfs-root/bin/$NAME
+        cat squashfs-root/bin/love archive/$LOVE_ARCHIVE > squashfs-root/bin/$NAME
         rm squashfs-root/bin/love
         chmod a+x squashfs-root/bin/$NAME
         sed -i '25,33d' squashfs-root/AppRun
         sed -i '$ a exec "$APPDIR/bin/'$NAME'" "$@"' squashfs-root/AppRun
         ICON_PATH=$(basename -- "icon.png")
         mkdir -p squashfs-root/share/icons/hicolor/256x256/apps
-        cp ../archive/icon.png "squashfs-root/share/icons/hicolor/256x256/apps/$NAME.${ICON_PATH##*.}"
-        cp ../archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
-        cp ../archive/icon.png squashfs-root/.DirIcon
+        cp archive/icon.png "squashfs-root/share/icons/hicolor/256x256/apps/$NAME.${ICON_PATH##*.}"
+        cp archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
+        cp archive/icon.png squashfs-root/.DirIcon
         
         $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
         chmod a+x $NAME
