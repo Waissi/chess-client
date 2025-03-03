@@ -156,7 +156,7 @@ jobs:
         LOVE=./love-main.AppImage
         chmod a+x $LOVE
 
-        $LOVE --appimage-extract 
+        $LOVE --appimage-extract  > /dev/null 2>&1
         rm squashfs-root/.DirIcon || true
         rm squashfs-root/love.svg || true
         rm squashfs-root/share/applications/*.desktop || true
@@ -189,11 +189,12 @@ jobs:
         cp archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
         cp archive/icon.png squashfs-root/.DirIcon
         
-        $APPIMAGETOOLKIT squashfs-root $NAME 
+        $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
         chmod a+x $NAME
-        zip -r $LINUX_BUILD $NAME
+        zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
     - name: create release
       run: |
+        ls .
         gh release upload v1 $LINUX_BUILD --clobber
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
