@@ -42,9 +42,9 @@ jobs:
     - uses: actions/download-artifact@master
       with:
         repository: love2d/love
-        path: bin
+        path: love_bin
     - run: |
-        ls bin
+        ls -R love_bin
 
   LINUX:
     needs: LOVE
