@@ -152,10 +152,6 @@ jobs:
         make LOVE_BRANCH=main
     - name: build game appimage
       run: |
-        ls
-        cd ..
-        ls
-        ls love
         APPIMAGETOOLKIT=love/appimagetool
         LOVE=love/love-main.AppImage
         chmod a+x $LOVE
