@@ -1,0 +1,217 @@
+name: Build
+
+env:
+  NAME: ${{ github.event.repository.name }}
+  LOVE_ARCHIVE: ${{ github.event.repository.name }}.love
+  MACOS_BUILD: ${{ github.event.repository.name }}_macOS.zip
+  LINUX_BUILD: ${{ github.event.repository.name }}_linux-x86_64.zip
+  WINDOWS_BUILD: ${{ github.event.repository.name }}_windows.zip
+
+on:
+  push:
+    branches:
+      - main
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  LOVE:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v4
+    - name: create .love file
+      run: |
+        zip -r $LOVE_ARCHIVE . -i main.lua -i conf.lua -i src/\* -i -i assets/\*  > /dev/null 2>&1
+        mkdir archive
+        mv $LOVE_ARCHIVE archive
+    - uses: actions/upload-artifact@master
+      with:
+        name: love_file
+        path: archive
+        
+  MACOS:
+    needs: LOVE
+    runs-on: macos-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v4
+    - uses: actions/download-artifact@master
+      with:
+        name: love_file
+        path: archive
+    - name: clone love and apple dependencies
+      run: |
+        git clone -b https://github.com/love2d/love.git
+        git clone -b https://github.com/love2d/love-apple-dependencies.git
+        mv love-apple-dependencies/macOS/Frameworks love/platform/xcode/macosx
+    - name: build icon images
+      run: |
+        sips -z 16 16     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/16.png
+        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/32.png
+        sips -z 64 64     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/64.png
+        sips -z 128 128   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/128.png
+        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/256.png
+        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/512.png
+        sips -z 1024 1024 icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/1024.png
+        sips -z 16 16     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16.png
+        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16@2x.png
+        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32.png
+        sips -z 64 64     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32@2x.png
+        sips -z 128 128   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128.png
+        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128@2x.png
+        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256.png
+        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256@2x.png
+        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512.png
+        sips -z 1024 1024 icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512@2x.png
+    - name: compile löve
+      run: |
+        xcodebuild clean archive -project love/platform/xcode/love.xcodeproj -scheme love-macosx -configuration Release -destination generic/platform=macOS -archivePath love/love-macos.xcarchive
+        mv archive/$LOVE_ARCHIVE love/love-macos.xcarchive/Products/Applications/love.app/Contents/Resources
+        xcodebuild -exportArchive -archivePath love/love-macos.xcarchive -exportPath love-macos -exportOptionsPlist love/platform/xcode/macosx/macos-copy-app.plist
+    - name: modify plist file
+      run: |
+        mv love-macos/love.app $NAME.app
+        plutil -replace CFBundleIdentifier -string "com.Waissi.Chess" $NAME.app/Contents/Info.plist
+        plutil -replace CFBundleName -string "Chess" $NAME.app/Contents/Info.plist
+        plutil -replace CFBundleShortVersionString -string "0.1" $NAME.app/Contents/Info.plist
+        plutil -replace NSHumanReadableCopyright -string "@Waissi" $NAME.app/Contents/Info.plist
+        plutil -remove UTExportedTypeDeclarations $NAME.app/Contents/Info.plist
+        plutil -remove CFBundleDocumentTypes $NAME.app/Contents/Info.plist
+        plutil -convert xml1 $NAME.app/Contents/Info.plist
+        ditto -c -k --sequesterRsrc --keepParent $NAME.app $MACOS_BUILD
+    - name: create release
+      run: |
+        gh release upload v1 $MACOS_BUILD --clobber
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
+
+  LINUX:
+    needs: LOVE
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v4
+    - uses: actions/download-artifact@master
+      with:
+        name: love_file
+        path: archive
+    - uses: actions/download-artifact@master
+      with:
+        repository: love2d/love
+        name: love-linux-X64.AppImage
+        path: bin
+    - name: update system and install libfuse2 + imagemagick
+      run: |
+        sudo apt update
+        sudo apt install libfuse2 imagemagick
+    - name: download appimage toolkit
+      run: |
+        wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
+        chmod +x ./appimagetool-x86_64.AppImage
+    - name: build appimage
+      run: |
+        LOVE=bin/love-linux-X64.AppImage
+        chmod a+x $LOVE
+        APPIMAGETOOLKIT=./appimagetool-x86_64.AppImage
+
+        convert icon.png -resize 256x256 "icon.png"
+        $LOVE --appimage-extract  > /dev/null 2>&1
+        rm squashfs-root/.DirIcon || true
+        rm squashfs-root/love.svg || true
+        rm squashfs-root/share/applications/*.desktop || true
+        rm -rf squashfs-root/share/icons || true
+        rm -rf squashfs-root/share/mime || true
+        rm -rf squashfs-root/share/pixmaps || true
+        rm -f squashfs-root/love.desktop || true
+        cat > $NAME.desktop << EOF
+        [Desktop Entry]
+        Name=$NAME
+        Comment="The best game ever"
+        Type=Application
+        Keywords=game;
+        Categories=Game;
+        Exec=$NAME %f
+        Icon=$NAME
+        Terminal=false
+        NoDisplay=false
+        EOF
+        cp $NAME.desktop squashfs-root
+        mv $NAME.desktop squashfs-root/share/applications
+        cat squashfs-root/bin/love archive/$LOVE_ARCHIVE > squashfs-root/bin/$NAME
+        rm squashfs-root/bin/love
+        chmod a+x squashfs-root/bin/$NAME
+        sed -i '25,33d' squashfs-root/AppRun
+        sed -i '$ a exec "$APPDIR/bin/'$NAME'" "$@"' squashfs-root/AppRun
+        ICON_PATH=$(basename -- "icon.png")
+        mkdir -p squashfs-root/share/icons/hicolor/256x256/apps
+        cp icon.png "squashfs-root/share/icons/hicolor/256x256/apps/$NAME.${ICON_PATH##*.}"
+        cp icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
+        cp icon.png squashfs-root/.DirIcon
+        
+        $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
+        chmod a+x $NAME
+        zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
+    - name: create release
+      run: |
+        gh release upload v1 $LINUX_BUILD --clobber
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
+        
+  WINDOWS:
+    needs: LOVE
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v4
+    - uses: actions/download-artifact@master
+      with:
+        name: love_file
+        path: archive
+    - uses: actions/download-artifact@master
+      with:
+        repository: love2d/love
+        name: love-windows-x64
+        path: bin
+    - name: download wine, love exe and rcedit
+      shell: bash
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+        sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+        sudo apt-get -y update
+        sudo apt-get -y --no-install-recommends install winehq-stable imagemagick
+        wget https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
+        wget https://github.com/love2d/love/releases/download/11.5/love-windows-x64.zip
+    - name: build new exe
+      shell: bash
+      run: |
+        unzip bin/love-windows-x64 -d .
+        rm love-windows-x64/lovec.exe
+        rm love-windows-x64/game.ico
+        rm love-windows-x64/love.ico
+        rm love-windows-x64/changes.txt
+        rm love-windows-x64/readme.txt
+        convert icon.png -define icon:auto-resize="256,128,96,64,48,32,24,16" "icon.ico"
+        env WINEARCH=win64 WINEPREFIX="$HOME/.wine-win64" wineboot --init
+        env WINEARCH=win64 WINEPREFIX="$HOME/.wine-win64" wine ./rcedit-x64.exe \
+            love-windows-x64/love.exe \
+            --set-version-string CompanyName "Waissi" \
+            --set-version-string ProductName "Chess" \
+            --set-version-string FileDescription "The best game ever" \
+            --set-version-string InternalName "Chess" \
+            --set-version-string LegalCopyright "@Waissi" \
+            --set-version-string OriginalFilename "Chess.exe" \
+            --set-version-string PrivateBuild "0.1" \
+            --set-file-version "0.1" \
+            --set-product-version "0.1"\
+            --set-icon "icon.ico"
+        
+        cat love-windows-x64/love.exe archive/$LOVE_ARCHIVE > love-windows-x64/$NAME.exe
+        rm love-windows-x64/love.exe
+        mv love-windows-x64 $NAME
+        zip -r $WINDOWS_BUILD $NAME > /dev/null 2>&1
+    - name: create release
+      run: |
+        gh release upload v1 $WINDOWS_BUILD --clobber
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

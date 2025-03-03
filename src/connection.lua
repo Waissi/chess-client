@@ -28,7 +28,7 @@ local handle_event = switch {
 return {
     init = function()
         if server then return end
-        server = host:connect("localhost:6789")
+        server = host:connect("3.70.227.137:6789")
     end,
 
     ---@param gameData table
