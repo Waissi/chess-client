@@ -89,7 +89,7 @@ jobs:
       run: |
         import os
         for i in range(250):
-            if os.system(f"make getdeps LOVE_BRANCH=12") == 0:
+            if os.system(f"make getdeps LOVE_BRANCH=main") == 0:
                 raise SystemExit(0)
         raise Exception("make getdeps failed")
     - name: Build AppImage
