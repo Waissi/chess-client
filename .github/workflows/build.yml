@@ -41,8 +41,8 @@ jobs:
         path: archive
     - name: clone love and apple dependencies
       run: |
-        git clone -b https://github.com/love2d/love.git
-        git clone -b https://github.com/love2d/love-apple-dependencies.git
+        git clone https://github.com/love2d/love.git
+        git clone https://github.com/love2d/love-apple-dependencies.git
         mv love-apple-dependencies/macOS/Frameworks love/platform/xcode/macosx
     - name: build icon images
       run: |
@@ -170,7 +170,7 @@ jobs:
     - uses: actions/download-artifact@master
       with:
         repository: love2d/love
-        name: love-windows-x64
+        name: love-windows-x64.zip
         path: bin
     - name: download wine, love exe and rcedit
       shell: bash
