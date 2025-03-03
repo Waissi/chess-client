@@ -39,13 +39,62 @@ jobs:
       with:
         name: love_file
         path: archive
-    - uses: actions/download-artifact@master
+    - name: Clone Dependencies
+      uses: actions/checkout@v4
+      with:
+        path: apple-dependencies
+        repository: love2d/love-apple-dependencies
+        ref: main
+    - name: Clone Löve
+      uses: actions/checkout@v4
       with:
         repository: love2d/love
-        path: love_bin
-        run: 
-    - run: |
-        ls -R love_bin
+        ref: main
+    - name: Move Dependencies
+      run: |
+        mv apple-dependencies/macOS/Frameworks love/platform/xcode/macosx
+        mv apple-dependencies/shared love/platform/xcode
+    - name: build icon images
+      run: |
+        sips -z 16 16     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/16.png
+        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/32.png
+        sips -z 64 64     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/64.png
+        sips -z 128 128   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/128.png
+        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/256.png
+        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/512.png
+        sips -z 1024 1024 icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/1024.png
+        sips -z 16 16     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16.png
+        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16@2x.png
+        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32.png
+        sips -z 64 64     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32@2x.png
+        sips -z 128 128   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128.png
+        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128@2x.png
+        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256.png
+        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256@2x.png
+        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512.png
+        sips -z 1024 1024 icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512@2x.png
+    - name: Build
+      run:
+        xcodebuild clean archive -project love/platform/xcode/love.xcodeproj -scheme love-macosx -configuration Release -destination generic/platform=macOS -archivePath love/love-macos.xcarchive
+    - name: Export Archive
+      run:
+        xcodebuild -exportArchive -archivePath love/love-macos.xcarchive -exportPath love-macos -exportOptionsPlist love/platform/xcode/macosx/macos-copy-app.plist
+    - name: modify plist file
+      run: |
+        mv love-macos/love.app $NAME.app
+        plutil -replace CFBundleIdentifier -string "com.Waissi.Chess" $NAME.app/Contents/Info.plist
+        plutil -replace CFBundleName -string "Chess" $NAME.app/Contents/Info.plist
+        plutil -replace CFBundleShortVersionString -string "0.1" $NAME.app/Contents/Info.plist
+        plutil -replace NSHumanReadableCopyright -string "@Waissi" $NAME.app/Contents/Info.plist
+        plutil -remove UTExportedTypeDeclarations $NAME.app/Contents/Info.plist
+        plutil -remove CFBundleDocumentTypes $NAME.app/Contents/Info.plist
+        plutil -convert xml1 $NAME.app/Contents/Info.plist
+        ditto -c -k --sequesterRsrc --keepParent $NAME.app $MACOS_BUILD
+    - name: create release
+      run: |
+        gh release upload v1 $MACOS_BUILD --clobber
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
 
   LINUX:
     needs: LOVE
@@ -101,11 +150,12 @@ jobs:
         path: archive
     - name: download appimage toolkit
       run: |
+        cd ..
         wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
         chmod +x ./appimagetool-x86_64.AppImage
     - name: build appimage
       run: |
-        LOVE=love-main.AppImage
+        LOVE=love/love-main.AppImage
         chmod a+x $LOVE
         APPIMAGETOOLKIT=./appimagetool-x86_64.AppImage
 
