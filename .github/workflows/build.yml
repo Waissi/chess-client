@@ -105,7 +105,7 @@ jobs:
         chmod +x ./appimagetool-x86_64.AppImage
     - name: build appimage
       run: |
-        LOVE=love-linux-X64.AppImage
+        LOVE=love-main.AppImage
         chmod a+x $LOVE
         APPIMAGETOOLKIT=./appimagetool-x86_64.AppImage
 
