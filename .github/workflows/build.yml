@@ -24,6 +24,8 @@ jobs:
         zip -r $LOVE_ARCHIVE . -i main.lua -i conf.lua -i src/\* -i -i assets/\*  > /dev/null 2>&1
         mkdir archive
         mv $LOVE_ARCHIVE archive
+        convert icon.png -define icon:auto-resize="256,128,96,64,48,32,24,16" "icon.ico"
+        mv icon.ico archive
     - uses: actions/upload-artifact@master
       with:
         name: love_file
@@ -48,6 +50,7 @@ jobs:
     - name: Clone Löve
       uses: actions/checkout@v4
       with:
+        path: love
         repository: love2d/love
         ref: main
     - name: Move Dependencies
@@ -74,8 +77,9 @@ jobs:
         sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512.png
         sips -z 1024 1024 icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512@2x.png
     - name: Build
-      run:
+      run: |
         xcodebuild clean archive -project love/platform/xcode/love.xcodeproj -scheme love-macosx -configuration Release -destination generic/platform=macOS -archivePath love/love-macos.xcarchive
+        mv archive/$LOVE_ARCHIVE love/love-macos.xcarchive/Products/Applications/love.app/Contents/Resources
     - name: Export Archive
       run:
         xcodebuild -exportArchive -archivePath love/love-macos.xcarchive -exportPath love-macos -exportOptionsPlist love/platform/xcode/macosx/macos-copy-app.plist
@@ -99,10 +103,6 @@ jobs:
   LINUX:
     needs: LOVE
     runs-on: ubuntu-latest
-    env:
-      ALSOFT_CONF: love2d-${{ github.sha }}/testing/resources/alsoft.conf
-      VK_LAYER_SETTINGS_PATH: love2d-${{ github.sha }}/testing/resources/vk_layer_settings.txt
-      DISPLAY: :99
     steps:
     - name: Update APT
       run: sudo apt-get update
@@ -129,7 +129,7 @@ jobs:
       with:
         repository: love2d/love-appimage-source
         ref: main
-    - name: clone love and apple dependencies
+    - name: clone löve
       run: |
           git clone https://github.com/love2d/love.git
           cd love
@@ -143,7 +143,6 @@ jobs:
         raise Exception("make getdeps failed")
     - name: Build AppImage
       run: make LOVE_BRANCH=main
-    
     - uses: actions/download-artifact@master
       with:
         name: love_file
@@ -155,7 +154,7 @@ jobs:
         chmod +x ./appimagetool-x86_64.AppImage
     - name: build appimage
       run: |
-        LOVE=love/love-main.AppImage
+        LOVE="$(find love -type f -name  *.AppImage)"
         chmod a+x $LOVE
         APPIMAGETOOLKIT=./appimagetool-x86_64.AppImage
 
@@ -204,57 +203,37 @@ jobs:
         
   WINDOWS:
     needs: LOVE
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
-    - name: checkout repo
-      uses: actions/checkout@v4
     - uses: actions/download-artifact@master
       with:
         name: love_file
         path: archive
-    - uses: actions/download-artifact@master
+    - name: compile love2d
+      shell: bash
+      run: |
+        git clone https://github.com/love2d/megasource megasource
+        cd megasource
+        git clone https://github.com/love2d/love libs/love
+        rm libs/love/extra/windows/love.ico
+        mv ../archive/icon.ico libs/love/extra/windows/love.ico
+        cmake -G "Visual Studio 17 2022" -A x64 -S. -Bbuild
+        cmake --build build --target love/love --config Release
+        cd ..
+    - name: build exe
+      shell: bash
+      run: |
+        mkdir bin
+        mkdir bin/$WINDOWS_BUILD
+        cp -r megasource/build/love/Release/** bin/$WINDOWS_BUILD
+        cat bin/$WINDOWS_BUILD/love.exe archive/$LOVE_ARCHIVE > bin/$WINDOWS_BUILD/$NAME.exe
+        rm bin/$WINDOWS_BUILD/*.lib
+        rm bin/$WINDOWS_BUILD/*.exp
+        rm bin/$WINDOWS_BUILD/love.exe
+    - uses: actions/upload-artifact@master
       with:
-        repository: love2d/love
-        name: love-windows-x64.zip
+        name: windows_export
         path: bin
-    - name: download wine, love exe and rcedit
-      shell: bash
-      run: |
-        sudo dpkg --add-architecture i386
-        sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
-        sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
-        sudo apt-get -y update
-        sudo apt-get -y --no-install-recommends install winehq-stable imagemagick
-        wget https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
-        wget https://github.com/love2d/love/releases/download/11.5/love-windows-x64.zip
-    - name: build new exe
-      shell: bash
-      run: |
-        unzip bin/love-windows-x64 -d .
-        rm love-windows-x64/lovec.exe
-        rm love-windows-x64/game.ico
-        rm love-windows-x64/love.ico
-        rm love-windows-x64/changes.txt
-        rm love-windows-x64/readme.txt
-        convert icon.png -define icon:auto-resize="256,128,96,64,48,32,24,16" "icon.ico"
-        env WINEARCH=win64 WINEPREFIX="$HOME/.wine-win64" wineboot --init
-        env WINEARCH=win64 WINEPREFIX="$HOME/.wine-win64" wine ./rcedit-x64.exe \
-            love-windows-x64/love.exe \
-            --set-version-string CompanyName "Waissi" \
-            --set-version-string ProductName "Chess" \
-            --set-version-string FileDescription "The best game ever" \
-            --set-version-string InternalName "Chess" \
-            --set-version-string LegalCopyright "@Waissi" \
-            --set-version-string OriginalFilename "Chess.exe" \
-            --set-version-string PrivateBuild "0.1" \
-            --set-file-version "0.1" \
-            --set-product-version "0.1"\
-            --set-icon "icon.ico"
-        
-        cat love-windows-x64/love.exe archive/$LOVE_ARCHIVE > love-windows-x64/$NAME.exe
-        rm love-windows-x64/love.exe
-        mv love-windows-x64 $NAME
-        zip -r $WINDOWS_BUILD $NAME > /dev/null 2>&1
     - name: create release
       run: |
         gh release upload v1 $WINDOWS_BUILD --clobber
