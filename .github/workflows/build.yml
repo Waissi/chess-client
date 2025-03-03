@@ -194,8 +194,7 @@ jobs:
         zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
     - name: create release
       run: |
-        ls .
-        gh release upload v1 $LINUX_BUILD --clobber
+        gh release upload v1 ./$LINUX_BUILD --clobber
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
         
