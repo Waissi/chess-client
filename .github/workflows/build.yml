@@ -195,7 +195,7 @@ jobs:
     - name: create release
       run: |
         ls .
-        echo"HERE"
+        echo "HERE"
         echo $LINUX_BUILD
         gh release upload v1 ./$LINUX_BUILD --clobber
       env:
