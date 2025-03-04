@@ -175,6 +175,7 @@ jobs:
       uses: actions/checkout@v4
     - name: create release
       run: |
+        ls .
         gh release upload v1 $LINUX_BUILD --clobber
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
@@ -206,12 +207,10 @@ jobs:
         rm bin/$WINDOWS_BUILD/*.lib
         rm bin/$WINDOWS_BUILD/*.exp
         rm bin/$WINDOWS_BUILD/love.exe
-    - uses: actions/upload-artifact@master
-      with:
-        name: windows_export
-        path: bin
+    - name: checkout repo
+      uses: actions/checkout@v4
     - name: create release
       run: |
-        gh release upload v1 $WINDOWS_BUILD --clobber
+        gh release upload v1 bin/$WINDOWS_BUILD --clobber
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
