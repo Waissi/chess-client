@@ -8,10 +8,13 @@ env:
   WINDOWS_BUILD: ${{ github.event.repository.name }}_windows.zip
 
 on:
-  push:
-    branches:
-      - main
-
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Manual trigger'
+        default: ''
+        required: false
+        type: string
 
 jobs:
   LOVE:
@@ -210,6 +213,6 @@ jobs:
         rm bin/$WINDOWS_BUILD/love.exe
     - name: create release
       run: |
-        gh release upload v1 bin/$WINDOWS_BUILD --clobber
+        gh release upload v1 bin\$WINDOWS_BUILD --clobber
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
