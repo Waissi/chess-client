@@ -107,7 +107,7 @@ jobs:
 
   LINUX:
     needs: LOVE
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - name: checkout repo
       uses: actions/checkout@v4
