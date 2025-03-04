@@ -212,6 +212,7 @@ jobs:
         rm $NAME/love.exe
         7z a -r $WINDOWS_BUILD $NAME
     - name: create release
+      shell: bash
       run: |
         gh release upload v1 $WINDOWS_BUILD --clobber
       env:
