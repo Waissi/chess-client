@@ -130,13 +130,8 @@ jobs:
           git clone https://github.com/love2d/love-appimage-source.git
           cd love-appimage-source
           make
-    - name: download appimage toolkit
-      run: |
-        wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
-        chmod +x ./appimagetool-x86_64.AppImage
     - name: build game appimage
       run: |
-        APPIMAGETOOLKIT=./appimagetool-x86_64.AppImage
         LOVE=./love-appimage-source/love-main.AppImage
         chmod a+x $LOVE
 
@@ -173,7 +168,7 @@ jobs:
         cp archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
         cp archive/icon.png squashfs-root/.DirIcon
         
-        $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
+        ./appimagetool squashfs-root $NAME  > /dev/null 2>&1
         chmod a+x $NAME
         zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
     - name: create release
