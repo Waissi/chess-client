@@ -119,6 +119,8 @@ jobs:
           git clone https://github.com/love2d/love-appimage-source.git
           cd love-appimage-source
           make .
+          echo "I AM HERE"
+          ls .
           cd ..
     - name: download appimage toolkit
       run: |
@@ -127,7 +129,7 @@ jobs:
     - name: build game appimage
       run: |
         APPIMAGETOOLKIT=./appimagetool-x86_64.AppImage
-        LOVE=love-appimage-source/love-main.AppImage
+        LOVE=./love-appimage-source/love-main.AppImage
         chmod a+x $LOVE
 
         $LOVE --appimage-extract  > /dev/null 2>&1
