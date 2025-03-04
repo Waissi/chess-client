@@ -106,6 +106,8 @@ jobs:
     needs: LOVE
     runs-on: ubuntu-latest
     steps:
+    - name: checkout repo
+      uses: actions/checkout@v4
     - uses: actions/download-artifact@master
       with:
         name: love_file
@@ -171,8 +173,6 @@ jobs:
         $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
         chmod a+x $NAME
         zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
-    - name: checkout repo
-      uses: actions/checkout@v4
     - name: create release
       run: |
         ls .
