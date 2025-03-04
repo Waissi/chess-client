@@ -175,15 +175,16 @@ jobs:
         zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
     - name: create release
       run: |
-        ls .
         gh release upload v1 $LINUX_BUILD --clobber
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
         
   WINDOWS:
     needs: LOVE
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
+    - name: checkout repo
+      uses: actions/checkout@v4
     - uses: actions/download-artifact@master
       with:
         name: love_file
@@ -207,8 +208,6 @@ jobs:
         rm bin/$WINDOWS_BUILD/*.lib
         rm bin/$WINDOWS_BUILD/*.exp
         rm bin/$WINDOWS_BUILD/love.exe
-    - name: checkout repo
-      uses: actions/checkout@v4
     - name: create release
       run: |
         gh release upload v1 bin/$WINDOWS_BUILD --clobber
