@@ -118,7 +118,7 @@ jobs:
       run: |
           git clone https://github.com/love2d/love-appimage-source.git
           cd love-appimage-source
-          make .
+          make
           echo "I AM HERE"
           ls .
           cd ..
