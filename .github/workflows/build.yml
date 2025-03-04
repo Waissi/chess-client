@@ -204,15 +204,14 @@ jobs:
     - name: build exe
       shell: bash
       run: |
-        mkdir bin
-        mkdir bin/$WINDOWS_BUILD
-        cp -r build/love/Release/** bin/$WINDOWS_BUILD
+        mkdir $WINDOWS_BUILD
+        cp -r build/love/Release/** $WINDOWS_BUILD
         cat bin/$WINDOWS_BUILD/love.exe archive/$LOVE_ARCHIVE > bin/$WINDOWS_BUILD/$NAME.exe
-        rm bin/$WINDOWS_BUILD/*.lib
-        rm bin/$WINDOWS_BUILD/*.exp
-        rm bin/$WINDOWS_BUILD/love.exe
+        rm $WINDOWS_BUILD/*.lib
+        rm $WINDOWS_BUILD/*.exp
+        rm $WINDOWS_BUILD/love.exe
     - name: create release
       run: |
-        gh release upload v1 bin\$WINDOWS_BUILD --clobber
+        gh release upload v1 $WINDOWS_BUILD --clobber
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
