@@ -204,12 +204,13 @@ jobs:
     - name: build exe
       shell: bash
       run: |
-        mkdir $WINDOWS_BUILD
-        cp -r build/love/Release/** $WINDOWS_BUILD
+        mkdir $NAME
+        cp -r build/love/Release/** $NAME
         cat bin/$WINDOWS_BUILD/love.exe archive/$LOVE_ARCHIVE > bin/$WINDOWS_BUILD/$NAME.exe
-        rm $WINDOWS_BUILD/*.lib
-        rm $WINDOWS_BUILD/*.exp
-        rm $WINDOWS_BUILD/love.exe
+        rm $NAME/*.lib
+        rm $NAME/*.exp
+        rm $NAME/love.exe
+        7z a -r $WINDOWS_BUILD $NAME
     - name: create release
       run: |
         gh release upload v1 $WINDOWS_BUILD --clobber
