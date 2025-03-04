@@ -168,7 +168,7 @@ jobs:
         cp archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
         cp archive/icon.png squashfs-root/.DirIcon
         
-        ./appimagetool squashfs-root $NAME  > /dev/null 2>&1
+        ./appimagetool squashfs-root $NAME 
         chmod a+x $NAME
         zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
     - name: create release
