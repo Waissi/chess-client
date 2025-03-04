@@ -203,7 +203,7 @@ jobs:
       run: |
         mkdir bin
         mkdir bin/$WINDOWS_BUILD
-        cp -r megasource/build/love/Release/** bin/$WINDOWS_BUILD
+        cp -r build/love/Release/** bin/$WINDOWS_BUILD
         cat bin/$WINDOWS_BUILD/love.exe archive/$LOVE_ARCHIVE > bin/$WINDOWS_BUILD/$NAME.exe
         rm bin/$WINDOWS_BUILD/*.lib
         rm bin/$WINDOWS_BUILD/*.exp
