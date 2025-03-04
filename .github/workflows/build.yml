@@ -135,7 +135,7 @@ jobs:
         LOVE=./love-appimage-source/love-main.AppImage
         chmod a+x $LOVE
 
-        $LOVE --appimage-extract 
+        $LOVE --appimage-extract  > /dev/null 2>&1
         rm squashfs-root/.DirIcon || true
         rm squashfs-root/love.svg || true
         rm squashfs-root/share/applications/*.desktop || true
@@ -170,9 +170,9 @@ jobs:
         
         $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
         chmod a+x $NAME
-        zip -r $LINUX_BUILD $NAME 
-        echo "I AM HERE"
-        ls .
+        zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
+    - name: checkout repo
+      uses: actions/checkout@v4
     - name: create release
       run: |
         gh release upload v1 $LINUX_BUILD --clobber
