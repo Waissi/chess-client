@@ -206,7 +206,7 @@ jobs:
       run: |
         mkdir $NAME
         cp -r build/love/Release/** $NAME
-        cat bin/$WINDOWS_BUILD/love.exe archive/$LOVE_ARCHIVE > bin/$WINDOWS_BUILD/$NAME.exe
+        cat $NAME/love.exe archive/$LOVE_ARCHIVE > $NAME/$NAME.exe
         rm $NAME/*.lib
         rm $NAME/*.exp
         rm $NAME/love.exe
