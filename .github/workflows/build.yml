@@ -120,14 +120,11 @@ jobs:
             libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev \
             libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
             libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev
-    - name: clone löve appimage source
+    - name: clone and build löve appimage source
       run: |
           git clone https://github.com/love2d/love-appimage-source.git
           cd love-appimage-source
           make
-          echo "I AM HERE"
-          ls .
-          cd ..
     - name: download appimage toolkit
       run: |
         wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
@@ -138,7 +135,7 @@ jobs:
         LOVE=./love-appimage-source/love-main.AppImage
         chmod a+x $LOVE
 
-        $LOVE --appimage-extract  > /dev/null 2>&1
+        $LOVE --appimage-extract 
         rm squashfs-root/.DirIcon || true
         rm squashfs-root/love.svg || true
         rm squashfs-root/share/applications/*.desktop || true
@@ -173,7 +170,9 @@ jobs:
         
         $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
         chmod a+x $NAME
-        zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
+        zip -r $LINUX_BUILD $NAME 
+        echo "I AM HERE"
+        ls .
     - name: create release
       run: |
         gh release upload v1 $LINUX_BUILD --clobber
