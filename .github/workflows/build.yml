@@ -191,11 +191,9 @@ jobs:
         
         $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
         chmod a+x $NAME
-        mkdir bin
-        zip -r bin/$LINUX_BUILD $NAME
     - name: create release
       run: |
-        gh release upload v1 bin/$LINUX_BUILD --clobber
+        gh release upload v1 $NAME --clobber
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
         
