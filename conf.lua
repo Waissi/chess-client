@@ -10,4 +10,5 @@ function love.conf(t)
     t.window.title = gameName
     t.window.width = 850
     t.window.height = 850
+    t.window.icon = "icon.png"
 end

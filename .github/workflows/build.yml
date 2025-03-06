@@ -26,7 +26,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt install imagemagick
-        zip -r $LOVE_ARCHIVE . -i main.lua -i conf.lua -i src/\* -i assets/\*  > /dev/null 2>&1
+        zip -r $LOVE_ARCHIVE . -i main.lua -i conf.lua -i icon.png -i src/\* -i assets/\*  > /dev/null 2>&1
         mkdir archive
         mv $LOVE_ARCHIVE archive
         convert icon.png -resize 256x256 "archive/icon.png"
@@ -168,7 +168,7 @@ jobs:
         cp archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
         cp archive/icon.png squashfs-root/.DirIcon
         
-        ./love-appimage-source/appimagetool squashfs-root $NAME 
+        ./love-appimage-source/appimagetool squashfs-root $NAME > /dev/null 2>&1
         chmod a+x $NAME
         zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
     - name: create release
