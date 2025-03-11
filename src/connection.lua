@@ -43,11 +43,13 @@ return {
         if server then return end
         if os.getenv("env") == "dev" then
             server = host:connect("localhost:6789", 5, userId)
+            print("Connecting with local server: ", server)
             return true
         end
         local status, address = https.request(url)
         if status == 200 then
             server = host:connect(address .. ":6789", 5, userId)
+            print("Connecting with remote server: ", server)
             return true
         end
     end,
