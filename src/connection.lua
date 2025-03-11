@@ -4,78 +4,80 @@ local M = import "modules"
 local enet = require "enet"
 local json = import "json"
 local host = enet.host_create()
+local https = require "https"
+local url = "https://xc6liv6pamtsqvg2yiflcscklu0hekbe.lambda-url.eu-central-1.on.aws/"
+local userId = os.time()
 local server
+local serverChannels = {
+    ["player_input"] = 1,
+    ["new"] = 2
+}
 
----@type fun(eventMessage: string, data: table)
-local handle_event = switch {
-    ---@param data table
-    ["init"] = function(data)
-        M.game.init(data.color)
+---@type fun(channel: number, data: string)
+local handle_event = {
+    ---@param color string
+    function(color)
+        M.game.init(color)
     end,
 
-    ["release"] = function()
+    ---@param data table
+    function(data)
+        local pieces = json.decode(data)
+        M.game.start(pieces)
+    end,
+
+    ---@param update table
+    function(update)
+        local data = json.decode(update)
+        M.game.update(data)
+    end,
+
+    function()
         M.game.release()
-        M.hud.push_menu("connection")
-        server = nil
-    end,
-
-    ---@param data table
-    ["game_update"] = function(data)
-        M.game.handle_update(data.gameData)
+        M.hud.push_menu("waitingRoom")
     end
 }
 
 return {
     init = function()
         if server then return end
-        server = host:connect("localhost:6789", 1, 123)
+        if os.getenv("env") == "dev" then
+            server = host:connect("localhost:6789", 5, userId)
+            return true
+        end
+        local status, address = https.request(url)
+        if status == 200 then
+            server = host:connect(address .. ":6789", 5, userId)
+            return true
+        end
     end,
 
     ---@param gameData table
-    send_game_data = function(gameData)
+    send_player_input = function(gameData)
         if not server then return end
-        local data = json.encode({ data = gameData, message = "player_turn" })
-        server:send(data)
-        host:service()
-    end,
-
-    ---@param previousColor string
-    ---@param newColor string
-    start_game = function(previousColor, newColor)
-        local data = json.encode(
-            {
-                message = "init",
-                data = {
-                    previousColor = previousColor,
-                    newColor = newColor
-                }
-            }
-        )
-        server:send(data)
+        local data = json.encode(gameData)
+        server:send(data, serverChannels["player_input"])
         host:service()
     end,
 
     new_game = function()
-        local data = json.encode({ message = "new" })
-        server:send(data)
+        server:send("", serverChannels["new"])
         host:service()
     end,
 
     end_game = function()
         if not server then return end
-        local data = json.encode({ message = "quit" })
-        server:send(data)
-        host:service()
-        host:destroy()
+        server:disconnect_now()
     end,
 
     update = function()
         if not server then return end
         local event = host:service()
-        if event and event.type == "receive" then
-            local data = json.decode(event.data)
-            handle_event(data.message, data)
-            host:service()
+        while event do
+            if event.type == "receive" then
+                handle_event[event.channel](event.data)
+            end
+            event = host:service()
         end
     end
 }

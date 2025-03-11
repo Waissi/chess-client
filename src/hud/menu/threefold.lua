@@ -19,7 +19,7 @@ return function(windowW, windowH)
             M.button:new(windowW / 2 - drawW / 2, windowH / 2, drawW, charH, drawText, 30,
                 function()
                     M.game.release()
-                    M.hud.push_menu("start")
+                    M.connection.new_game()
                 end),
             M.button:new(windowW / 2 - continueW / 2, windowH / 2 + charH * 2, continueW, charH, continueText, 30,
                 function()

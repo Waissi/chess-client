@@ -16,10 +16,11 @@ return {
         hostColor = color
     end,
 
-    ---@param pos Position
-    translate = function(pos)
-        if hostColor == "white" then return pos.x, pos.y end
-        return translation[pos.x], translation[pos.y]
+    ---@param x number
+    ---@param y number
+    translate = function(x, y)
+        if hostColor == "white" then return x, y end
+        return translation[x], translation[y]
     end,
 
     ---@param screenW number

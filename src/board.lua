@@ -26,6 +26,16 @@ return {
     ---@param board Square[][]
     ---@param x number
     ---@param y number
+    ---@param mouseX number
+    ---@param mouseY number
+    is_square_hovered = function(board, x, y, mouseX, mouseY)
+        local square = board[y][x]
+        return M.square.is_hovered(square, mouseX, mouseY)
+    end,
+
+    ---@param board Square[][]
+    ---@param x number
+    ---@param y number
     get_hovered_square = function(board, x, y)
         for j = 1, 8 do
             for i = 1, 8 do

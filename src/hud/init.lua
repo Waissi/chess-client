@@ -10,12 +10,12 @@ return {
     init = function()
         local width, height = M.window.get_dimensions()
         menus = {
-            start = M.menu.init("start", width, height),
             connection = M.menu.init("connection", width, height),
             threefold = M.menu.init("threefold", width, height),
             fivefold = M.menu.init("fivefold", width, height),
             checkmate = M.menu.init("checkmate", width, height),
-            victory = M.menu.init("victory", width, height)
+            victory = M.menu.init("victory", width, height),
+            waitingRoom = M.menu.init("waitingRoom", width, height)
         }
         currentMenu = "connection"
     end,

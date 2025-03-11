@@ -1,4 +1,5 @@
 ---@class BoardModule
 ---@field new fun(): Square[][]
+---@field is_square_hovered fun(board: Square[][], x: number, y: number, mouseX: number, mouseY: number): boolean
 ---@field get_hovered_square fun(board: Square[][], x: number, y: number): Square?
 ---@field draw fun(board: Square[][])

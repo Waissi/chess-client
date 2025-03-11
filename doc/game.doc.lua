@@ -1,12 +1,11 @@
 ---@class GameModule
----@field init fun()
+---@field init fun(color: string)
+---@field start fun(pieces: Piece[][])
 ---@field release fun()
 ---@field continue_playing fun()
----@field on_invalid_movement fun()
----@field get_opponent_color fun(): string
 ---@field on_mouse_moved fun(x: number, y: number): boolean
 ---@field on_mouse_pressed fun(x: number, y: number, button: number)
----@field handle_update fun(data: table)
+---@field update fun(data: table)
 ---@field draw fun()
 
 ---@class Game

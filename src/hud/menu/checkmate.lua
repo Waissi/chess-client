@@ -19,7 +19,8 @@ return function(windowW, windowH)
             M.button:new(windowW / 2 - newGameW / 2, windowH / 2, newGameW + charW, charH, newGameText, 30,
                 function()
                     M.game.release()
-                    M.hud.push_menu("start")
+                    M.connection.new_game()
+                    M.hud.push_menu("waitingRoom")
                 end),
             M.button:new(windowW / 2 - quitW / 2 - charW / 2, windowH / 2 + charH * 2, quitW + charW, charH, quitText, 30,
                 function()

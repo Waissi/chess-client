@@ -26,11 +26,11 @@ jobs:
       run: |
         sudo apt update
         sudo apt install imagemagick
-        zip -r $LOVE_ARCHIVE . -i main.lua -i conf.lua -i icon.png -i src/\* -i assets/\*  > /dev/null 2>&1
+        zip -r $LOVE_ARCHIVE . -i main.lua -i conf.lua -i src/\* -i assets/\*  > /dev/null 2>&1
         mkdir archive
         mv $LOVE_ARCHIVE archive
-        convert icon.png -resize 256x256 "archive/icon.png"
-        convert icon.png -define icon:auto-resize="256,128,96,64,48,32,24,16" "archive/icon.ico"
+        convert assets/icon.png -resize 256x256 "archive/icon.png"
+        convert assets/icon.png -define icon:auto-resize="256,128,96,64,48,32,24,16" "archive/icon.ico"
     - uses: actions/upload-artifact@master
       with:
         name: love_file
@@ -64,23 +64,23 @@ jobs:
         mv apple-dependencies/shared love/platform/xcode
     - name: build icon images
       run: |
-        sips -z 16 16     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/16.png
-        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/32.png
-        sips -z 64 64     icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/64.png
-        sips -z 128 128   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/128.png
-        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/256.png
-        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/512.png
-        sips -z 1024 1024 icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/1024.png
-        sips -z 16 16     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16.png
-        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16@2x.png
-        sips -z 32 32     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32.png
-        sips -z 64 64     icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32@2x.png
-        sips -z 128 128   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128.png
-        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128@2x.png
-        sips -z 256 256   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256.png
-        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256@2x.png
-        sips -z 512 512   icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512.png
-        sips -z 1024 1024 icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512@2x.png
+        sips -z 16 16     assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/16.png
+        sips -z 32 32     assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/32.png
+        sips -z 64 64     assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/64.png
+        sips -z 128 128   assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/128.png
+        sips -z 256 256   assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/256.png
+        sips -z 512 512   assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/512.png
+        sips -z 1024 1024 assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/1024.png
+        sips -z 16 16     assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16.png
+        sips -z 32 32     assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_16x16@2x.png
+        sips -z 32 32     assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32.png
+        sips -z 64 64     assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_32x32@2x.png
+        sips -z 128 128   assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128.png
+        sips -z 256 256   assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_128x128@2x.png
+        sips -z 256 256   assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256.png
+        sips -z 512 512   assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_256x256@2x.png
+        sips -z 512 512   assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512.png
+        sips -z 1024 1024 assets/icon.png --out love/platform/xcode/Images.xcassets/GameIcon.iconset/icon_512x512@2x.png
     - name: Build
       run: |
         xcodebuild clean archive -project love/platform/xcode/love.xcodeproj -scheme love-macosx -configuration Release -destination generic/platform=macOS -archivePath love/love-macos.xcarchive

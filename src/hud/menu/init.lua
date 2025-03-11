@@ -1,10 +1,10 @@
 local menus = {
-    start = import "startMenu",
     connection = import "connectionMenu",
     threefold = import "threefold",
     fivefold = import "fivefold",
     checkmate = import "checkmate",
-    victory = import "victory"
+    victory = import "victory",
+    waitingRoom = import "waitingRoom"
 }
 
 return {

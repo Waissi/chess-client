@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Debug Löve",
             "program": {
-                "command": "love"
+                "command": "love12"
             },
             "args": [
                 "${workspaceFolder}",

@@ -1,4 +1,4 @@
 ---@class CoordinatesModule
 ---@field init fun(color: string)
----@field translate fun(pos: Position): number, number
+---@field translate fun(x: number, y: number): number, number
 ---@field draw fun(screenW: number, screenH: number, squareW: number, squareH: number, columnW: number)

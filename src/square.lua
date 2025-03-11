@@ -20,17 +20,6 @@ return {
     end,
 
     ---@param square Square
-    ---@param piece Piece
-    occupy = function(square, piece)
-        square.piece = piece
-    end,
-
-    ---@param square Square
-    free = function(square)
-        square.piece = nil
-    end,
-
-    ---@param square Square
     ---@param x number
     ---@param y number
     is_hovered = function(square, x, y)

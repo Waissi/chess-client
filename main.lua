@@ -1,5 +1,4 @@
 require "src.import"
-import "switch"
 import "table"
 
 ---@type Modules
