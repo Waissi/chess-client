@@ -5,7 +5,7 @@ local enet = require "enet"
 local json = import "json"
 local host = enet.host_create()
 local https = require "https"
-local url = "https://xc6liv6pamtsqvg2yiflcscklu0hekbe.lambda-url.eu-central-1.on.aws/"
+local url = "https://nncnfzpyl5svsujp7dqgug7aru0wvlcf.lambda-url.eu-central-1.on.aws/"
 local userId = os.time()
 local server
 local serverChannels = {
@@ -46,7 +46,7 @@ return {
             print("Connecting with local server: ", server)
             return true
         end
-        local status, address = https.request(url)
+        local status, address = https.request(url, { data = "server" })
         if status == 200 then
             server = host:connect(address .. ":6789", 5, userId)
             print("Connecting with remote server: ", server)
