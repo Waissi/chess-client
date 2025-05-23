@@ -1,1 +1,4 @@
+**/*.swp
+.luarc.json
+scripts/*
 **/*.DS_Store
