@@ -5,7 +5,7 @@ local enet = require "enet"
 local json = import "json"
 local host = enet.host_create()
 local https = require "https"
-local url = "https://nncnfzpyl5svsujp7dqgug7aru0wvlcf.lambda-url.eu-central-1.on.aws/"
+local url = "https://tgekpafzhoxm2pg5xz25lgpnmy0tbxuv.lambda-url.eu-central-1.on.aws/"
 local userId = os.time()
 local server
 local serverChannels = {
