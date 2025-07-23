@@ -46,23 +46,12 @@ jobs:
       with:
         name: love_file
         path: archive
-    - name: Clone Dependencies
-      uses: actions/checkout@v4
-      with:
-        path: apple-dependencies
-        repository: love2d/love-apple-dependencies
-        ref: 11.x
-    - name: Clone Löve
-      uses: actions/checkout@v4
-      with:
-        path: love
-        repository: love2d/love
-        ref: 11.x
-    - name: Move Dependencies
+   - name: clone love and apple dependencies
       run: |
-        mv apple-dependencies/love-apple-dependencies/macOS/Frameworks love/love/platform/xcode/macosx
-        mv apple-dependencies/love-apple-dependencies/shared love/love/platform/xcode
-    - name: build icon images
+        git clone -b 11.x https://github.com/love2d/love.git
+        git clone -b 11.x https://github.com/love2d/love-apple-dependencies.git
+        mv love-apple-dependencies/macOS/Frameworks love/platform/xcode/macosx
+   - name: build icon images
       run: |
         sips -z 16 16     assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/16.png
         sips -z 32 32     assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/32.png
@@ -159,7 +148,7 @@ jobs:
         chmod a+x squashfs-root/bin/$NAME
         sed -i '25,33d' squashfs-root/AppRun
         sed -i '$ a exec "$APPDIR/bin/'$NAME'" "$@"' squashfs-root/AppRun
-        ICON_PATH=$(basename -- "assets/icon.png")
+        ICON_PATH=$(basename -- "icon.png")
         mkdir -p squashfs-root/share/icons/hicolor/256x256/apps
         cp archive/icon.png "squashfs-root/share/icons/hicolor/256x256/apps/$NAME.${ICON_PATH##*.}"
         cp archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
