@@ -231,7 +231,7 @@ jobs:
         rm love-11.5-win64/love.exe
         mv love-11.5-win64 $NAME
         zip -r $WINDOWS_BUILD $NAME > /dev/null 2>&1
-   - name: create release
+    - name: create release
       shell: bash
       run: |
         gh release upload v1 $WINDOWS_BUILD --clobber
