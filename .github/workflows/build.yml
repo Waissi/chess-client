@@ -96,7 +96,7 @@ jobs:
 
   LINUX:
     needs: LOVE
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
     - name: checkout repo
       uses: actions/checkout@v4
@@ -148,7 +148,7 @@ jobs:
         chmod a+x squashfs-root/bin/$NAME
         sed -i '25,33d' squashfs-root/AppRun
         sed -i '$ a exec "$APPDIR/bin/'$NAME'" "$@"' squashfs-root/AppRun
-        ICON_PATH=$(basename -- "icon.png")
+        ICON_PATH=$(basename -- "archive/icon.png")
         mkdir -p squashfs-root/share/icons/hicolor/256x256/apps
         cp archive/icon.png "squashfs-root/share/icons/hicolor/256x256/apps/$NAME.${ICON_PATH##*.}"
         cp archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
