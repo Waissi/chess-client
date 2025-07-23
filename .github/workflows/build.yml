@@ -60,8 +60,8 @@ jobs:
         ref: 11.x
     - name: Move Dependencies
       run: |
-        mv love-apple-dependencies/macOS/Frameworks love/platform/xcode/macosx
-        mv love-apple-dependencies/shared love/platform/xcode
+        mv apple-dependencies/love-apple-dependencies/macOS/Frameworks love/love/platform/xcode/macosx
+        mv apple-dependencies/love-apple-dependencies/shared love/love/platform/xcode
     - name: build icon images
       run: |
         sips -z 16 16     assets/icon.png --out love/platform/xcode/Images.xcassets/OS\ X\ AppIcon.appiconset/16.png
@@ -161,9 +161,9 @@ jobs:
         sed -i '$ a exec "$APPDIR/bin/'$NAME'" "$@"' squashfs-root/AppRun
         ICON_PATH=$(basename -- "assets/icon.png")
         mkdir -p squashfs-root/share/icons/hicolor/256x256/apps
-        cp icon.png "squashfs-root/share/icons/hicolor/256x256/apps/$NAME.${ICON_PATH##*.}"
-        cp icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
-        cp icon.png squashfs-root/.DirIcon
+        cp archive/icon.png "squashfs-root/share/icons/hicolor/256x256/apps/$NAME.${ICON_PATH##*.}"
+        cp archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
+        cp archive/icon.png squashfs-root/.DirIcon
 
         $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
         chmod a+x $NAME
@@ -225,7 +225,7 @@ jobs:
             --set-version-string PrivateBuild "0.1" \
             --set-file-version "0.1" \
             --set-product-version "0.1"\
-            --set-icon "icon.ico"
+            --set-icon "archive/icon.ico"
         
         cat love-11.5-win64/love.exe archive/$LOVE_ARCHIVE > love-11.5-win64/$NAME.exe
         rm love-11.5-win64/love.exe
