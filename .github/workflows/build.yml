@@ -1,7 +1,7 @@
 name: Build
 
 env:
-  NAME: ${{ github.event.repository.name }}
+  NAME: chess
   LOVE_ARCHIVE: ${{ github.event.repository.name }}.love
   MACOS_BUILD: ${{ github.event.repository.name }}_macOS.zip
   LINUX_BUILD: ${{ github.event.repository.name }}_linux-x86_64.zip
@@ -51,13 +51,13 @@ jobs:
       with:
         path: apple-dependencies
         repository: love2d/love-apple-dependencies
-        ref: main
+        ref: 11.x
     - name: Clone Löve
       uses: actions/checkout@v4
       with:
         path: love
         repository: love2d/love
-        ref: main
+        ref: 11.x
     - name: Move Dependencies
       run: |
         mv apple-dependencies/macOS/Frameworks love/platform/xcode/macosx
@@ -115,25 +115,22 @@ jobs:
       with:
         name: love_file
         path: archive
-    - name: Install Dependencies
+    - name: update system and install libfuse2
       run: |
-        sudo apt-get update
-        sudo apt-get install build-essential git make \
-            autotools-dev automake autoconf libtool patchelf curl pkg-config libfuse2 \
-            cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
-            libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev \
-            libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-            libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev
-    - name: clone and build löve appimage source
+        sudo apt update
+        sudo apt install libfuse2 
+    - name: download löve
       run: |
-          git clone https://github.com/love2d/love-appimage-source.git
-          cd love-appimage-source
-          make
-    - name: build game appimage
+        wget https://github.com/love2d/love/releases/download/11.5/love-11.5-x86_64.AppImage
+        chmod a+x ./love-11.5-x86_64.AppImage
+    - name: download appimage toolkit
       run: |
-        LOVE=./love-appimage-source/love-main.AppImage
-        chmod a+x $LOVE
+        wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
+        chmod +x ./appimagetool-x86_64.AppImage
+    - name: build appimage
+      run: |
+        LOVE=./love-11.5-x86_64.AppImage
+        APPIMAGETOOLKIT=./appimagetool-x86_64.AppImage
 
         $LOVE --appimage-extract  > /dev/null 2>&1
         rm squashfs-root/.DirIcon || true
@@ -146,7 +143,7 @@ jobs:
         cat > $NAME.desktop << EOF
         [Desktop Entry]
         Name=$NAME
-        Comment="The best game ever"
+        Comment="The best chess game ever"
         Type=Application
         Keywords=game;
         Categories=Game;
@@ -162,13 +159,13 @@ jobs:
         chmod a+x squashfs-root/bin/$NAME
         sed -i '25,33d' squashfs-root/AppRun
         sed -i '$ a exec "$APPDIR/bin/'$NAME'" "$@"' squashfs-root/AppRun
-        ICON_PATH=$(basename -- "icon.png")
+        ICON_PATH=$(basename -- "assets/icon.png")
         mkdir -p squashfs-root/share/icons/hicolor/256x256/apps
-        cp archive/icon.png "squashfs-root/share/icons/hicolor/256x256/apps/$NAME.${ICON_PATH##*.}"
-        cp archive/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
-        cp archive/icon.png squashfs-root/.DirIcon
-        
-        ./love-appimage-source/appimagetool squashfs-root $NAME > /dev/null 2>&1
+        cp assets/icon.png "squashfs-root/share/icons/hicolor/256x256/apps/$NAME.${ICON_PATH##*.}"
+        cp assets/icon.png "squashfs-root/$NAME.${ICON_PATH##*.}"
+        cp assets/icon.png squashfs-root/.DirIcon
+
+        $APPIMAGETOOLKIT squashfs-root $NAME  > /dev/null 2>&1
         chmod a+x $NAME
         zip -r $LINUX_BUILD $NAME > /dev/null 2>&1
     - name: create release
@@ -179,7 +176,7 @@ jobs:
         
   WINDOWS:
     needs: LOVE
-    runs-on: windows-2025
+    runs-on: ubuntu-latest
     steps:
     - name: checkout repo
       uses: actions/checkout@v4
@@ -187,26 +184,54 @@ jobs:
       with:
         name: love_file
         path: archive
-    - name: compile love2d
+    - name: download wine, love exe and rcedit
       shell: bash
       run: |
-        git clone https://github.com/love2d/megasource megasource
-        git clone https://github.com/love2d/love megasource/libs/love
-        rm megasource/libs/love/extra/windows/love.ico
-        mv archive/icon.ico megasource/libs/love/extra/windows/love.ico
-        cmake -G "Visual Studio 17 2022" -A x64 -S megasource -B build
-        cmake --build build --target love/love --config Release
-    - name: build exe
+        sudo dpkg --add-architecture i386
+        sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+        sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+        sudo apt-get -y update
+        sudo apt-get -y --no-install-recommends install winehq-stable imagemagick
+        wget https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
+        wget https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
+    - name: download wine, love exe and rcedit
       shell: bash
       run: |
-        mkdir $NAME
-        cp -r build/love/Release/** $NAME
-        cat $NAME/love.exe archive/$LOVE_ARCHIVE > $NAME/$NAME.exe
-        rm $NAME/*.lib
-        rm $NAME/*.exp
-        rm $NAME/love.exe
-        7z a -r $WINDOWS_BUILD $NAME
-    - name: create release
+        sudo dpkg --add-architecture i386
+        sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
+        sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+        sudo apt-get -y update
+        sudo apt-get -y --no-install-recommends install winehq-stable imagemagick
+        wget https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
+        wget https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
+    - name: build new exe
+      shell: bash
+      run: |
+        unzip love-11.5-win64.zip
+        rm love-11.5-win64/lovec.exe
+        rm love-11.5-win64/game.ico
+        rm love-11.5-win64/love.ico
+        rm love-11.5-win64/changes.txt
+        rm love-11.5-win64/readme.txt
+        env WINEARCH=win64 WINEPREFIX="$HOME/.wine-win64" wineboot --init
+        env WINEARCH=win64 WINEPREFIX="$HOME/.wine-win64" wine ./rcedit-x64.exe \
+            love-11.5-win64/love.exe \
+            --set-version-string CompanyName "Waissi" \
+            --set-version-string ProductName "Chess" \
+            --set-version-string FileDescription "The best chess game ever" \
+            --set-version-string InternalName "Chess" \
+            --set-version-string LegalCopyright "@Waissi" \
+            --set-version-string OriginalFilename "chess.exe" \
+            --set-version-string PrivateBuild "0.1" \
+            --set-file-version "0.1" \
+            --set-product-version "0.1"\
+            --set-icon "assets/icon.ico"
+        
+        cat love-11.5-win64/love.exe archive/$LOVE_ARCHIVE > love-11.5-win64/$NAME.exe
+        rm love-11.5-win64/love.exe
+        mv love-11.5-win64 $NAME
+        zip -r $WINDOWS_BUILD $NAME > /dev/null 2>&1
+   - name: create release
       shell: bash
       run: |
         gh release upload v1 $WINDOWS_BUILD --clobber

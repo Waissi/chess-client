@@ -2,16 +2,36 @@
 local M = import "modules"
 
 local enet = require "enet"
-local json = import "json"
 local host = enet.host_create()
-local https = require "https"
-local url = "https://qfigqmeles6mwpsyxoi2tbq52e0xwiul.lambda-url.eu-central-1.on.aws/"
-local userId = os.time()
 local server
 local serverChannels = {
     ["player_input"] = 1,
     ["new"] = 2
 }
+
+local function serialize_table(data)
+    local parsedData = {}
+    for index, value in pairs(data) do
+        if type(value) == "table" then
+            value = serialize_table(value)
+        elseif type(value) == "string" then
+            value = table.concat({ '"', value, '"' })
+        end
+        if type(index) == "number" then
+            parsedData[#parsedData + 1] = tostring(value)
+            parsedData[#parsedData + 1] = ','
+        else
+            parsedData[#parsedData + 1] = index
+            parsedData[#parsedData + 1] = '='
+            parsedData[#parsedData + 1] = tostring(value)
+            parsedData[#parsedData + 1] = ','
+        end
+    end
+    table.remove(parsedData, #parsedData)
+    table.insert(parsedData, 1, '{')
+    table.insert(parsedData, '}')
+    return table.concat(parsedData)
+end
 
 ---@type fun(channel: number, data: string)
 local handle_event = {
@@ -20,15 +40,17 @@ local handle_event = {
         M.game.init(color)
     end,
 
-    ---@param data table
+    ---@param data string
     function(data)
-        local pieces = json.decode(data)
+        assert(string.sub(data, 1, 1) == "{" and string.sub(data, #data, #data) == "}", "corrupt data")
+        local pieces = loadstring("return" .. data)()
         M.game.start(pieces)
     end,
 
-    ---@param update table
+    ---@param update string
     function(update)
-        local data = json.decode(update)
+        assert(string.sub(update, 1, 1) == "{" and string.sub(update, #update, #update) == "}", "corrupt data")
+        local data = loadstring("return" .. update)()
         M.game.update(data)
     end,
 
@@ -41,23 +63,20 @@ local handle_event = {
 return {
     init = function()
         if server then return end
-        if os.getenv("env") == "dev" then
-            server = host:connect("localhost:6789", 5, userId)
+        if arg[#arg] == "dev" then
+            server = host:connect("localhost:6789", 5)
             print("Connecting with local server: ", server)
             return true
         end
-        local status, address = https.request(url, { data = "server" })
-        if status == 200 then
-            server = host:connect(address .. ":6789", 5, userId)
-            print("Connecting with remote server: ", server)
-            return true
-        end
+        server = host:connect("chess.konngames.com:6789", 5)
+        print("Connecting with remote server: ", server)
+        return true
     end,
 
     ---@param gameData table
     send_player_input = function(gameData)
         if not server then return end
-        local data = json.encode(gameData)
+        local data = serialize_table(gameData)
         server:send(data, serverChannels["player_input"])
         host:service()
     end,
