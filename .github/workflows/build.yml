@@ -114,12 +114,12 @@ jobs:
         chmod a+x ./love-11.5-x86_64.AppImage
     - name: download appimage toolkit
       run: |
-        wget https://github.com/AppImage/AppImageKit/releases/download/13/obsolete-appimagetool-x86_64.AppImage
-        chmod +x ./obsolete-appimagetool-x86_64.AppImage
+        wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+        chmod +x ./appimagetool-x86_64.AppImage
     - name: build appimage
       run: |
         LOVE=./love-11.5-x86_64.AppImage
-        APPIMAGETOOLKIT=./obsolete-appimagetool-x86_64.AppImage
+        APPIMAGETOOLKIT=./appimagetool-x86_64.AppImage
 
         $LOVE --appimage-extract  > /dev/null 2>&1
         rm squashfs-root/.DirIcon || true
